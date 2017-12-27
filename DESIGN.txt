@@ -1,0 +1,70 @@
+Stanley Lin, James Smith, Ryan Siu
+
+A non blocking TCP socket chat server that can sustain many chat rooms and users
+
+
+A statement of the problem you are solving and/or a high level description of the project.
+People want to talk to each other, so we’ll help them by designing an online chat interface where people can create and join unique chat rooms to communicate with each other.
+
+A description as to how the project will be used (describe the user interface).
+Users start a client program and input a username on startup. They will be shown existing chat rooms or create a new one themselves. They can then join one of the chat rooms or create their own(they will be prompted to name it and then automatically connected to it). Once inside, they can send messages to other users. If they want to get caught up on what other members were talking about that day, they can type ‘!history’ and they will receive all of the messages sent for that day. Additionally, if the user wants to send messages to another chat room without being in it, they can precede their message with ‘!<desired_chat_room>”. If then want to leave a chat room they type ‘!leave’ which returns you to a display of available chat rooms and prompts. 
+
+Stretches: private chat rooms, direct messaging, sending files
+
+A description of your technical design. This should include:
+	How you will be using the topics covered in class in the project.
+		We will be using networking to connect the clients and the server. It will be a non blocking TCP socket server that all client programs will connect to. Allocating memory will be used as in every project in order to edit variables from functions and keep track of messages. We will be using files and file info to keep logs of daily chat room activity. Signals will be used to ensure that the server will save all of the necessary components and finalize the logs when given exit signals.
+How you are breaking down the project and who is responsible for which parts.
+	Server:
+		Basic Server: James
+		Nonblocking swap: James
+		Server-side protocol handling: Ryan
+		Distribution of messages: Ryan
+		Logging history: Ryan & James
+	Client:
+		Writing initial client connection: Stanley
+		Client Interface: Stanley
+Packaging protocol: Stanley
+		Stopping stdout from overwriting what’s being typed: Stanley
+		
+	What data structures you will be using and how.
+		We will be using structs as our messaging protocol on the server and client sides.
+		Structs can be sent directly between the client and server
+		These are not final, just what we envision right now.
+		struct client_message{ //the message the client sends to server
+			unsigned short message_type;//command vs message
+char * chatroom;//message destination
+			char * username; //display name
+			char * message;
+		}
+
+		struct chat_room{ //a chat room on the server. We will have a list of these
+			char * name;//server name
+int * users;//list of client socket fd’s
+}
+
+struct server_message{//received by client to display to user
+	unsigned short message_type;//message vs return value of command
+			char * username; //display name
+			char * message;
+		}
+		
+	What algorithms you will be using, and how.
+Our server will run off of one algo once set up that we will roughly outline.
+
+The server will set itself up and then wait for incoming connections. Once it accepts it will create a socket connection for that user. The server will send the user a list of the available chat rooms on the server. The server will receive a message from the client declaring the desired chat room they want to join or if they want to create one. The server will then place that connections fd in that chat room struct, creating the chat room struct in the process if needed. The server will then receive messages from clients. The server will extract the message, package it in its own struct, iterate through the chat_room struct corresponding to the one in the client message and sends it through each socket using the fd. After sending the message, it writes that message to the chat room’s daily log. If it receives a command to switch a user to another chat room, the server will remove that user’s socket fd from its current chat room and add it to the desired one. 
+		
+A timeline with expected completion dates of parts of the project.
+	Server:
+		Basic Server: 01/07
+		Nonblocking swap: 01/09
+		Server-side protocol handling: 01/11 
+		Distribution of messages:01/11
+		Logging history: 01/13
+	Client:
+		Writing initial client connection: 01/08
+(Un)Packaging protocol: 01/09
+		Client Interface: 01/12
+		Stopping stdout from overwriting what’s being typed: 01/14
+
+Our MVP is a blocking server with a single chatroom
