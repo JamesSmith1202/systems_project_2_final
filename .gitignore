@@ -1,3 +1,6 @@
+# Temporary files for vim
+*.swp
+
 # Prerequisites
 *.d
 
