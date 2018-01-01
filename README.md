@@ -8,3 +8,6 @@ You will need to install the following libraries through apt-get:
 * libncursesw5-dev
 * ncurses-term
 * libcdk5-dev
+
+Or just copy-paste this: `sudo apt-get install libncurses5-dev libncursesw5-dev ncurses-term libcdk5-dev`
+
