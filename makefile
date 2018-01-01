@@ -14,3 +14,7 @@ clean:
 	rm -rf *~
 	rm -rf *.o
 	rm -rf run
+
+client_prototype: proj_proto.c
+	gcc -o prototype proj_proto.c -l ncurses -l cdk
+

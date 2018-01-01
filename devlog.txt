@@ -1,3 +1,9 @@
 jamesS -- 2017-12-26 21:23:10
 initial log
 
+linS -- 2017-12-31 19:52:29
+added dependencies, updated README
+
+linS -- 2017-12-31 19:53:10
+added my prototype of client (just for reference)
+
