@@ -1,6 +1,9 @@
 # Temporary files for vim
 *.swp
 
+client_run
+server_run
+
 # Prerequisites
 *.d
 
