@@ -5,8 +5,8 @@ run:
 	gnome-terminal -e ./server_run
 	./client_run
 
-client: client.o
-	gcc -o client_run client.o
+client: client.o processes.o
+	gcc -o client_run client.o processes.o -l ncurses -l cdk
 
 server: server.o
 	gcc -o server_run server.o
@@ -14,8 +14,11 @@ server: server.o
 server.o: server/server.c include/protocol.h
 	gcc -c server/server.c include/protocol.h
 
-client.o: client/client.c include/protocol.h
-	gcc -c client/client.c include/protocol.h
+client.o: client/client.c client/processes.h
+	gcc -c client/client.c client/processes.h
+
+processes.o: client/processes.c include/protocol.h client/processes.h
+	gcc -c client/processes.c include/protocol.h client/processes.h
 
 clean:
 	rm -f *~

@@ -1,3 +1,6 @@
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
+
 //message type
 #define MT_COMMAND 0
 #define MT_MESSAGE 1
@@ -21,3 +24,6 @@ struct server_message{//received by client to display to user
 	char *username; //display name
 	char *message;
 };
+
+#endif
+
