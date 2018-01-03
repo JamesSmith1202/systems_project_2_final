@@ -7,3 +7,6 @@ added dependencies, updated README
 linS -- 2017-12-31 19:53:10
 added my prototype of client (just for reference)
 
+linS -- 2018-01-02 19:15:45
+adding setup files for client
+
