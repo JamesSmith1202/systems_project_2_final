@@ -77,6 +77,7 @@ void graphics_process(int read_input_fd,
 				move(cur_y, cur_x);
 				
 			}
+			
 			else if (s[0] != '\n') {
 				addch(s[0]);
 				cur_x++;

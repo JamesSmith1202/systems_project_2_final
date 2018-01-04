@@ -5,6 +5,11 @@ run:
 	gnome-terminal -e ./server_run
 	./client_run
 
+client-debug:
+	gcc -g -c client/client.c client/processes.h
+	gcc -g -c client/processes.c include/protocol.h client/processes.h
+	gcc -g -o client_run client.o processes.o -l ncurses -l cdk
+
 client: client.o processes.o
 	gcc -o client_run client.o processes.o -l ncurses -l cdk
 

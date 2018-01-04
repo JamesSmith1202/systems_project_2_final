@@ -24,7 +24,7 @@ int main() {
 	if (is_parent) {
 		//initialize ncurses here cuz network won't need it
 		initscr();
-		echo();
+		noecho();
 		cbreak();
 		
 		is_parent = fork();
