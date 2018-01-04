@@ -59,7 +59,7 @@ void graphics_process(int read_input_fd,
 		memset(s, 0, sizeof(s));
 		if (read(read_input_fd, s, sizeof(s)) != -1) {
 			if (strlen(s) > 1) {
-				//mvwprintw(, max_y-4, 1, "");
+				//mvwprintw(log, max_y-4, 1, "");
 				addCDKSwindow(scroll, s, BOTTOM);
 				while (cur_x > 1) {
 					move(cur_y, --cur_x);
@@ -137,10 +137,12 @@ void network_process(int read_fd, int write_fd) {
 	hint.ai_family = AF_INET;
 	hint.ai_socktype = SOCK_STREAM;
 	
-	getaddrinfo(0, "12321", &hints, &data);
+	if (getaddrinfo(0, "12321", &hint, &data) == -1) {
+		//send message to main that error occured
+	}
 	
 	
 	
-	int my_fd = socket();
+	//int my_fd = socket();
 }
 
