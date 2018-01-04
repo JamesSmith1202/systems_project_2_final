@@ -3,9 +3,6 @@
 
 #include<unistd.h>
 #include<fcntl.h>
-#include<netdb.h>
-#include<sys/socket.h>
-#include<sys/types.h>
 
 //fd's for pipes
 #define FD_READ		0

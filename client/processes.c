@@ -1,6 +1,7 @@
 #include<cdk/cdk.h>
 
 #include"../include/protocol.h"
+#include"networking.h"
 #include"processes.h"
 
 void graphics_process(int read_input_fd,
@@ -132,6 +133,8 @@ void input_process(int write_fd) {
 }
 
 void network_process(int read_fd, int write_fd) {
+	char message[256];
+	
 	struct addrinfo hint, *data;
 	memset(&hint, 0, sizeof(struct addrinfo));
 	hint.ai_flags = AI_PASSIVE;
@@ -140,10 +143,17 @@ void network_process(int read_fd, int write_fd) {
 	
 	if (getaddrinfo(0, "12321", &hint, &data) == -1) {
 		//send message to main that error occured
+		strncpy(message, "An error occured when connecting",
+			sizeof(message));
+		write(write_fd, message, strlen(message));
 	}
 	
+	//debugging, print all returned addresses
+	print_addr_list(write_fd, data);
 	
-	
-	//int my_fd = socket();
+	int my_fd = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
+	if (my_fd == -1)
+	sprintf(message, "Created socket with fd: %d\n", my_fd);
+	write(write_fd, message, strlen(message));
 }
 
