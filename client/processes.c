@@ -4,6 +4,23 @@
 #include"networking.h"
 #include"processes.h"
 
+//used by main process to print data from network
+void network_print(char *data, CDKSWINDOW *scroll, CDKSCREEN *screen) {
+	char *tok = (char *)malloc(128);
+	//char *temp = (char *)malloc(256);
+	//strncpy(temp, data, sizeof(temp));
+	
+	while( (tok = strsep(&data, "\n")) != 0) {
+		//tok = strsep(&temp, "\n");
+		if (strlen(tok) > 1) addCDKSwindow(scroll, tok, BOTTOM);
+	}
+	
+	refreshCDKScreen(screen);
+	
+	free(tok);
+	tok = 0;
+}
+
 void graphics_process(int read_input_fd,
 		int read_network_fd, int write_network_fd) {
 	WINDOW *input, *log;
@@ -87,8 +104,13 @@ void graphics_process(int read_input_fd,
 		
 		memset(s, 0, sizeof(s));
 		if (read(read_network_fd, s, sizeof(s)) != -1) {
+			
+			network_print(s, scroll, log_screen);
+			
+			/*
 			addCDKSwindow(scroll, s, BOTTOM);
 			refreshCDKScreen(log_screen);
+			*/
 		}
 		refresh();
 	}
@@ -141,6 +163,7 @@ void network_process(int read_fd, int write_fd) {
 	hint.ai_family = AF_INET;
 	hint.ai_socktype = SOCK_STREAM;
 	
+	//should pass in the server's address
 	if (getaddrinfo(0, "12321", &hint, &data) == -1) {
 		//send message to main that error occured
 		strncpy(message, "An error occured when connecting",
@@ -152,7 +175,7 @@ void network_process(int read_fd, int write_fd) {
 	print_addr_list(write_fd, data);
 	
 	int my_fd = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
-	if (my_fd == -1)
+	//if (my_fd == -1)
 	sprintf(message, "Created socket with fd: %d\n", my_fd);
 	write(write_fd, message, strlen(message));
 }

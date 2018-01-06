@@ -9,7 +9,7 @@ client-debug:
 	gcc -g -c client/client.c client/processes.h
 	gcc -g -c client/processes.c include/protocol.h client/processes.h client/networking.h
 	gcc -g -c client/networking.c client/networking.h
-	gcc -o client_run client.o processes.o -l ncurses -l cdk
+	gcc -o client_run client.o processes.o networking.o -l ncurses -l cdk
 
 client: client.o processes.o networking.o
 	gcc -o client_run client.o processes.o networking.o -l ncurses -l cdk
