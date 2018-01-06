@@ -7,12 +7,9 @@
 //used by main process to print data from network
 void network_print(char *data, CDKSWINDOW *scroll, CDKSCREEN *screen) {
 	char *tok = (char *)malloc(128);
-	//char *temp = (char *)malloc(256);
-	//strncpy(temp, data, sizeof(temp));
 	
 	while( (tok = strsep(&data, "\n")) != 0) {
-		//tok = strsep(&temp, "\n");
-		if (strlen(tok) > 1) addCDKSwindow(scroll, tok, BOTTOM);
+		if (tok[0] != '\n') addCDKSwindow(scroll, tok, BOTTOM);
 	}
 	
 	refreshCDKScreen(screen);
@@ -21,8 +18,8 @@ void network_print(char *data, CDKSWINDOW *scroll, CDKSCREEN *screen) {
 	tok = 0;
 }
 
-void graphics_process(int read_input_fd,
-		int read_network_fd, int write_network_fd) {
+void graphics_process(int read_cursor_fd, int read_network_fd) {
+		//int read_network_fd, int write_network_fd) {
 	WINDOW *input, *log;
 	int max_x, max_y;
 	
@@ -64,21 +61,18 @@ void graphics_process(int read_input_fd,
 		0
 	);
 	
-	char s[128];
+	char s[MSG_MAX_LEN];
 	memset(s, 0, sizeof(s));
 	int cur_x, cur_y;
 	move(max_y-2, 1);
 	getyx(stdscr, cur_y, cur_x);
 	refresh();
 	refreshCDKScreen(log_screen);
-	//wrefresh(input);
-	//wrefresh(log);
 	while(1) {
 		memset(s, 0, sizeof(s));
-		if (read(read_input_fd, s, sizeof(s)) != -1) {
-			if (strlen(s) > 1) {
-				//mvwprintw(log, max_y-4, 1, "");
-				addCDKSwindow(scroll, s, BOTTOM);
+		if (read(read_cursor_fd, s, sizeof(s)) != -1) {
+			if (s[0] == '\n'/*strlen(s) > 1*/) {
+				//addCDKSwindow(scroll, s, BOTTOM);
 				while (cur_x > 1) {
 					move(cur_y, --cur_x);
 					addch(' ');
@@ -104,13 +98,7 @@ void graphics_process(int read_input_fd,
 		
 		memset(s, 0, sizeof(s));
 		if (read(read_network_fd, s, sizeof(s)) != -1) {
-			
 			network_print(s, scroll, log_screen);
-			
-			/*
-			addCDKSwindow(scroll, s, BOTTOM);
-			refreshCDKScreen(log_screen);
-			*/
 		}
 		refresh();
 	}
@@ -120,9 +108,9 @@ void graphics_process(int read_input_fd,
 	endCDK();
 }
 
-void input_process(int write_fd) {
+void input_process(int write_cursor_fd, int write_input_fd) {
 	int c;
-	char str_buf[128];
+	char str_buf[MSG_MAX_LEN];
 	int index = 0;
 	int max_x, max_y;
 	
@@ -134,20 +122,23 @@ void input_process(int write_fd) {
 			str_buf[index++] = '\n';
 			str_buf[index] = 0;
 			index = 0;
-			write(write_fd, str_buf,
-				strlen(str_buf)*sizeof(char));
+			write(write_cursor_fd, &c, sizeof(char));
+			if (strlen(str_buf) > 1) {
+				write(write_input_fd, str_buf, strlen(str_buf));
+			}
+			memset(str_buf, 0, sizeof(str_buf));
 		break;
 		
 		case 127:
 		case KEY_BACKSPACE:
 			if (index > 0) str_buf[--index] = 0;
-			write(write_fd, &c, sizeof(char));
+			write(write_cursor_fd, &c, sizeof(char));
 		break;
 		
 		default:
 			if (index < max_x-2) {
 				str_buf[index++] = c;
-				write(write_fd, &c, sizeof(char));
+				write(write_cursor_fd, &c, sizeof(char));
 			}
 		break;
 		}
@@ -155,7 +146,7 @@ void input_process(int write_fd) {
 }
 
 void network_process(int read_fd, int write_fd) {
-	char message[256];
+	char message[MSG_MAX_LEN];
 	
 	struct addrinfo hint, *data;
 	memset(&hint, 0, sizeof(struct addrinfo));
@@ -164,9 +155,9 @@ void network_process(int read_fd, int write_fd) {
 	hint.ai_socktype = SOCK_STREAM;
 	
 	//should pass in the server's address
-	if (getaddrinfo(0, "12321", &hint, &data) == -1) {
+	if (getaddrinfo("127.0.0.1", "15000", &hint, &data) == -1) {
 		//send message to main that error occured
-		strncpy(message, "An error occured when connecting",
+		strncpy(message, "An error occured when connecting\n",
 			sizeof(message));
 		write(write_fd, message, strlen(message));
 	}
@@ -178,5 +169,29 @@ void network_process(int read_fd, int write_fd) {
 	//if (my_fd == -1)
 	sprintf(message, "Created socket with fd: %d\n", my_fd);
 	write(write_fd, message, strlen(message));
+	
+	if (connect(my_fd, data->ai_addr, data->ai_addrlen) == -1) {
+		sprintf(message, "Connection failed\n");
+		write(write_fd, message, strlen(message));
+		//better handling
+	}
+	else {
+		sprintf(message, "Connection success\n");
+		write(write_fd, message, strlen(message));
+	}
+	
+	int bytes;
+	memset(message, 0, sizeof(message));
+	//wait for user input data to come in
+	while( read(read_fd, message, sizeof(message)) != -1 ) {
+		bytes = send(my_fd, message, strlen(message), 0);
+		if (bytes == -1) {
+			sprintf(message, "Write failed\n");
+			write(write_fd, message, strlen(message));
+		}
+		bytes = recv(my_fd, message, sizeof(message), 0);
+		write(write_fd, message, strlen(message));
+		memset(message, 0, sizeof(message));
+	}
 }
 
