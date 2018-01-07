@@ -1,9 +1,6 @@
-#include <stdlib.h>
-#include <ctype.h>
-
 #include "../include/parse.h"
 
-char* strip(char *line) {
+char* strip(const char *line) {
 	char *result = (char*)malloc(sizeof(line));
 	//strip the front
 	while ( *line && isspace( *line ) ) line++;
@@ -15,7 +12,8 @@ char* strip(char *line) {
 	*(back+1) = 0;
 
 	//create the new string
-	result = line;
+	//result = line;
+	strncpy(result, line, sizeof(result));
 	int index = 0;
 	while (*line) *(result + (index++)) = *(line++);
 
