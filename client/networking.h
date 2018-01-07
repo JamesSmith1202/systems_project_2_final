@@ -12,7 +12,10 @@
 //max length of message
 #define MSG_MAX_LEN	256
 
+//prints each address returned from getaddrinfo
 void print_addr_list(int write_fd, struct addrinfo *data);
+
+//tests for a valid ip/port pair
 int valid_connection(int write_fd, struct addrinfo hint, struct addrinfo **data,
 		char *ip, char *port);
 

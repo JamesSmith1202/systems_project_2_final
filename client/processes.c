@@ -171,12 +171,7 @@ void network_process(int read_fd, int write_fd) {
 	
 	char ip[64];
 	char port[16];
-	//char *temp;
-	//int loc;
 	do {
-	/*	sprintf(message, "%p\n", &ip);
-		write(write_fd, message, strlen(message));
-*/
 		memset(ip, 0, sizeof(ip));
 		memset(port, 0, sizeof(port));
 		
@@ -184,52 +179,16 @@ void network_process(int read_fd, int write_fd) {
 		write(write_fd, message, strlen(message));
 		read(read_fd, ip, sizeof(ip));
 		if (strchr(ip, '\n') != 0) *strchr(ip, '\n') = 0;
-/*
-		sprintf(message, "ip before: %s\n", ip);
-		write(write_fd, message, strlen(message));
- 
-		
-		temp = strip(ip);
-		sprintf(message, "temp: %s\n", temp);
-		write(write_fd, message, strlen(message));
-
-		
-		strncpy(ip, temp, sizeof(ip));
-		free(temp);
-*/
-		sprintf(message, "ip: %s\n", ip);
-		write(write_fd, message, strlen(message));
 
 		sprintf(message, "Now enter the port\n");
 		write(write_fd, message, strlen(message));
 		read(read_fd, port, sizeof(port));
 		if (strchr(port, '\n') != 0) *strchr(port, '\n') = 0;
-		//temp = strip(port);
-		//strncpy(port, temp, sizeof(port));
-		//free(temp);
 		
-		sprintf(message, "Got: %s:%s\n", ip, port);
+		sprintf(message, "Checking for validity: %s:%s\n", ip, port);
 		write(write_fd, message, strlen(message));
 	}
 	while(!valid_connection(write_fd, hint, &data, ip, port));
-	sprintf(message, "Valid address\n");
-	write(write_fd, message, strlen(message));
-	
-	/*
-	sprintf(message, "outside valid: %d\n", data->ai_addrlen);
-	write(write_fd, message, strlen(message));
-	*/
-
-	
-	/*
-	//should pass in the server's address
-	if (getaddrinfo("127.0.0.1", "15000", &hint, &data) == -1) {
-		//send message to main that error occured
-		strncpy(message, "An error occured when connecting\n",
-			sizeof(message));
-		write(write_fd, message, strlen(message));
-	}
-	*/
 	
 	//debugging, print all returned addresses
 	print_addr_list(write_fd, data);

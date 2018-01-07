@@ -28,3 +28,6 @@ adding in functionality for user to input ip/port to connect to
 linS -- 2018-01-07 14:38:17
 user can now connect by typing an ip/port combination
 
+linS -- 2018-01-07 15:04:01
+cleanup
+
