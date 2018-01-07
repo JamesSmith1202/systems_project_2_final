@@ -1,7 +1,7 @@
 #include"networking.h"
 
 void print_addr_list(int write_fd, struct addrinfo *data) {
-	char message[256];
+	char message[MSG_MAX_LEN];
 	char addr_temp[128];
 	while (data != 0) {
 		struct sockaddr_in *ip = (struct sockaddr_in *)data->ai_addr;
@@ -12,5 +12,19 @@ void print_addr_list(int write_fd, struct addrinfo *data) {
 		
 		data = data->ai_next;
 	}
+}
+
+int valid_connection(int write_fd, struct addrinfo hint, struct addrinfo *data,
+		char *ip, char *port) {
+	int res;
+	char message[MSG_MAX_LEN];
+	if ( (res = getaddrinfo(ip, port, &hint, &data)) != 0) {
+		sprintf(message, "%s\n", gai_strerror(res));
+		write(write_fd, message, strlen(message));
+		
+		return 0;
+	}
+	
+	return 1;
 }
 

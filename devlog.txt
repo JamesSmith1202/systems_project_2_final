@@ -22,3 +22,6 @@ more networking work
 linS -- 2018-01-06 17:43:04
 client can connect to a server now
 
+linS -- 2018-01-07 12:39:37
+adding in functionality for user to input ip/port to connect to
+

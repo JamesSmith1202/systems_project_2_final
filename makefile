@@ -9,10 +9,11 @@ client-debug:
 	gcc -g -c client/client.c client/processes.h
 	gcc -g -c client/processes.c include/protocol.h client/processes.h client/networking.h
 	gcc -g -c client/networking.c client/networking.h
-	gcc -o client_run client.o processes.o networking.o -l ncurses -l cdk
+	gcc -g -c util/parse.c include/parse.h
+	gcc -o client_run client.o processes.o networking.o parse.o -l ncurses -l cdk
 
-client: client.o processes.o networking.o
-	gcc -o client_run client.o processes.o networking.o -l ncurses -l cdk
+client: client.o processes.o networking.o parse.o
+	gcc -o client_run client.o processes.o networking.o parse.o -l ncurses -l cdk
 
 server: server.o
 	gcc -o server_run server.o
@@ -28,6 +29,9 @@ processes.o: client/processes.c include/protocol.h client/processes.h client/net
 
 networking.o: client/networking.c client/networking.h
 	gcc -c client/networking.c client/networking.h
+
+parse.o: util/parse.c include/parse.h
+	gcc -c util/parse.c include/parse.h
 
 clean:
 	rm -f *~

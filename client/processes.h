@@ -8,9 +8,6 @@
 #define FD_READ		0
 #define FD_WRITE	1
 
-//max length of message
-#define MSG_MAX_LEN	256
-
 /*
 Program flow:
 

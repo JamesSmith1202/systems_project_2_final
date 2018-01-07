@@ -5,6 +5,14 @@
 #define MT_COMMAND 0
 #define MT_MESSAGE 1
 
+/*
+	commands the user can use (ideas):
+	!list:			list chatrooms
+	!join <room>:		join a chatroom
+	!leave:			leave the current room
+	!msg <room> <message>:	message the indicated room
+	!history:		see a log of the messages in the current room
+*/
 
 struct client_message{ //the message the client sends to server
 	unsigned short message_type;//command vs message

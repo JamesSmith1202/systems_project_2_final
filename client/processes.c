@@ -4,6 +4,8 @@
 #include"networking.h"
 #include"processes.h"
 
+//TODO a stretch, but factor out the network write calls to a single function
+
 //used by main process to print data from network
 void network_print(char *data, CDKSWINDOW *scroll, CDKSCREEN *screen) {
 	char *tok = (char *)malloc(128);
@@ -145,6 +147,18 @@ void input_process(int write_cursor_fd, int write_input_fd) {
 	}
 }
 
+/*
+ask user for ip/port to connect to
+	keep asking for this if connection fails
+ask user for username
+	keep asking if username already exists
+ask user which chatroom to join
+	keep asking if chatroom doesn't exist
+user can begin sending messages
+
+network process will package message into the protocol
+network process will handle response message
+*/
 void network_process(int read_fd, int write_fd) {
 	char message[MSG_MAX_LEN];
 	
@@ -154,6 +168,24 @@ void network_process(int read_fd, int write_fd) {
 	hint.ai_family = AF_INET;
 	hint.ai_socktype = SOCK_STREAM;
 	
+	char ip[64];
+	char port[16];
+	char *temp;
+	do {
+		sprintf(message, "Please enter an ip address\n");
+		write(write_fd, message, strlen(message));
+		read(read_fd, ip, sizeof(ip));
+		temp = ip;
+		temp = strip(ip);
+		
+		sprintf(message, "Now enter the port\n");
+		write(write_fd, message, strlen(message));
+		read(read_fd, port, sizeof(port));
+		port = strip(port);
+	}
+	while(!valid_connection(write_fd, hint, data, ip, port));
+	
+	/*
 	//should pass in the server's address
 	if (getaddrinfo("127.0.0.1", "15000", &hint, &data) == -1) {
 		//send message to main that error occured
@@ -161,6 +193,7 @@ void network_process(int read_fd, int write_fd) {
 			sizeof(message));
 		write(write_fd, message, strlen(message));
 	}
+	*/
 	
 	//debugging, print all returned addresses
 	print_addr_list(write_fd, data);
