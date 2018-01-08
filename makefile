@@ -1,3 +1,6 @@
+client-objs = client.o processes.o networking.o parse.o
+client-libs = -l ncurses -l cdk
+
 all:
 	make client server
 
@@ -10,10 +13,10 @@ client-debug:
 	gcc -g -c client/processes.c include/protocol.h client/processes.h client/networking.h
 	gcc -g -c client/networking.c client/networking.h
 	gcc -g -c util/parse.c include/parse.h
-	gcc -o client_run client.o processes.o networking.o parse.o -l ncurses -l cdk
+	gcc -o $(client-objs) $(client-libs)
 
 client: client.o processes.o networking.o parse.o
-	gcc -o client_run client.o processes.o networking.o parse.o -l ncurses -l cdk
+	gcc -o $(client-objs) $(client-libs)
 
 server: server.o
 	gcc -o server_run server.o
