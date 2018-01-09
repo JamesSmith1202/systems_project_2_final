@@ -1,3 +1,4 @@
+#include"../include/protocol.h"
 #include"networking.h"
 
 void print_addr_list(int write_fd, struct addrinfo *data) {

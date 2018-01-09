@@ -5,6 +5,7 @@
 #include"networking.h"
 #include"processes.h"
 
+//TODO actually limit input bounds
 //TODO a stretch, but factor out the network write calls to a single function
 
 //used by main process to print data from network
@@ -171,42 +172,56 @@ void network_process(int read_fd, int write_fd) {
 	
 	char ip[64];
 	char port[16];
+	int my_fd, status;
+	
+	//initial connection loop
 	do {
-		memset(ip, 0, sizeof(ip));
-		memset(port, 0, sizeof(port));
-		
-		sprintf(message, "Please enter an ip address\n");
-		write(write_fd, message, strlen(message));
-		read(read_fd, ip, sizeof(ip));
-		if (strchr(ip, '\n') != 0) *strchr(ip, '\n') = 0;
+		do {
+			memset(ip, 0, sizeof(ip));
+			memset(port, 0, sizeof(port));
+			
+			sprintf(message, "Please enter an ip address\n");
+			write(write_fd, message, strlen(message));
+			read(read_fd, ip, sizeof(ip));
+			if (strchr(ip, '\n') != 0) *strchr(ip, '\n') = 0;
 
-		sprintf(message, "Now enter the port\n");
-		write(write_fd, message, strlen(message));
-		read(read_fd, port, sizeof(port));
-		if (strchr(port, '\n') != 0) *strchr(port, '\n') = 0;
+			sprintf(message, "Now enter the port\n");
+			write(write_fd, message, strlen(message));
+			read(read_fd, port, sizeof(port));
+			if (strchr(port, '\n') != 0) *strchr(port, '\n') = 0;
+			
+			sprintf(message, "Checking for validity: %s:%s\n", ip, port);
+			write(write_fd, message, strlen(message));
+		}
+		while(!valid_connection(write_fd, hint, &data, ip, port));
 		
-		sprintf(message, "Checking for validity: %s:%s\n", ip, port);
+		//debugging, print all returned addresses
+		print_addr_list(write_fd, data);
+		
+		int my_fd = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
+		//if (my_fd == -1)
+		sprintf(message, "Created socket with fd: %d\n", my_fd);
 		write(write_fd, message, strlen(message));
+		
+		if ( (status = connect(my_fd, data->ai_addr, data->ai_addrlen)) == -1) {
+			sprintf(message, "Connection failed\n");
+			write(write_fd, message, strlen(message));
+			//better handling
+		}
+		else {
+			sprintf(message, "Connection success\n");
+			write(write_fd, message, strlen(message));
+		}
 	}
-	while(!valid_connection(write_fd, hint, &data, ip, port));
+	while ( status == -1);
 	
-	//debugging, print all returned addresses
-	print_addr_list(write_fd, data);
-	
-	int my_fd = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
-	//if (my_fd == -1)
-	sprintf(message, "Created socket with fd: %d\n", my_fd);
+	//username creation loop
+	char username[USER_MAX_LEN];
+	sprintf(message, "please enter a username (max 32 characters)\n");
 	write(write_fd, message, strlen(message));
-	
-	if (connect(my_fd, data->ai_addr, data->ai_addrlen) == -1) {
-		sprintf(message, "Connection failed\n");
-		write(write_fd, message, strlen(message));
-		//better handling
-	}
-	else {
-		sprintf(message, "Connection success\n");
-		write(write_fd, message, strlen(message));
-	}
+	read(read_fd, message, 32);
+	//check if username is unique
+	write(write_fd, message, strlen(message));
 	
 	int bytes;
 	memset(message, 0, sizeof(message));

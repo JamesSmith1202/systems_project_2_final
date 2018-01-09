@@ -5,6 +5,12 @@
 #define MT_COMMAND 0
 #define MT_MESSAGE 1
 
+//max length of message
+#define MSG_MAX_LEN	256
+
+//max username length
+#define USER_MAX_LEN	32
+
 /*
 	commands the user can use (ideas):
 	!list:			list chatrooms

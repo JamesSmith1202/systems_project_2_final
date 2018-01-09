@@ -9,9 +9,6 @@
 #include<stdio.h>
 #include<unistd.h>
 
-//max length of message
-#define MSG_MAX_LEN	256
-
 //prints each address returned from getaddrinfo
 void print_addr_list(int write_fd, struct addrinfo *data);
 

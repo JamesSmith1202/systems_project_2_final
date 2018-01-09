@@ -11,7 +11,7 @@ run:
 client-debug:
 	gcc -g -c client/client.c client/processes.h
 	gcc -g -c client/processes.c include/protocol.h client/processes.h client/networking.h
-	gcc -g -c client/networking.c client/networking.h
+	gcc -g -c client/networking.c client/networking.h include/protocol.h
 	gcc -g -c util/parse.c include/parse.h
 	gcc -o $(client-objs) $(client-libs)
 
@@ -30,8 +30,8 @@ client.o: client/client.c client/processes.h
 processes.o: client/processes.c include/protocol.h client/processes.h client/networking.h
 	gcc -c client/processes.c include/protocol.h client/processes.h client/networking.h
 
-networking.o: client/networking.c client/networking.h
-	gcc -c client/networking.c client/networking.h
+networking.o: client/networking.c client/networking.h include/protocol.h
+	gcc -c client/networking.c client/networking.h include/protocol.h
 
 parse.o: util/parse.c include/parse.h
 	gcc -c util/parse.c include/parse.h
