@@ -15,7 +15,7 @@ client-debug:
 	gcc -g -c util/parse.c include/parse.h
 	gcc -o $(client-objs) $(client-libs)
 
-client: client.o processes.o networking.o parse.o
+client: $(client-objs)
 	gcc -o $(client-objs) $(client-libs)
 
 server: server.o
