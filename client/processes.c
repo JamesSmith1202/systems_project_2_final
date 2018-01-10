@@ -72,17 +72,16 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 	getyx(stdscr, cur_y, cur_x);
 	refresh();
 	refreshCDKScreen(log_screen);
+	/*
 	while(1) {
 		memset(s, 0, sizeof(s));
 		if (read(read_cursor_fd, s, sizeof(s)) != -1) {
-			if (s[0] == '\n'/*strlen(s) > 1*/) {
-				//addCDKSwindow(scroll, s, BOTTOM);
+			if (s[0] == '\n') {
 				while (cur_x > 1) {
 					move(cur_y, --cur_x);
 					addch(' ');
 					move(cur_y, cur_x);
 				}
-				//refreshCDKScreen(log_screen);
 			}
 			//else if (s[0] == KEY_BACKSPACE) {
 			else if (s[0] == 127) {
@@ -103,6 +102,53 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 		memset(s, 0, sizeof(s));
 		if (read(read_network_fd, s, sizeof(s)) != -1) {
 			network_print(s, scroll, log_screen);
+		}
+		refresh();
+	}
+	*/
+	
+	//create a set of fds
+	fd_set input_set;
+	while(1) {
+		memset(s, 0, sizeof(s));
+		
+		FD_ZERO(&input_set);
+		FD_SET(read_network_fd, &input_set);
+		FD_SET(read_cursor_fd, &input_set);
+		
+		//a requirement of the select function
+		int max = (read_network_fd > read_cursor_fd) ? read_network_fd : read_cursor_fd;
+		select(max + 1, &input_set, 0, 0, 0);
+		
+		if (FD_ISSET(read_cursor_fd, &input_set)) {
+			if (read(read_cursor_fd, s, sizeof(s)) != -1) {
+				if (s[0] == '\n') {
+					while (cur_x > 1) {
+						move(cur_y, --cur_x);
+						addch(' ');
+						move(cur_y, cur_x);
+					}
+				}
+				//else if (s[0] == KEY_BACKSPACE) {
+				else if (s[0] == 127) {
+					if (cur_x > 1) {
+						move(cur_y, --cur_x);
+					}
+					addch(' ');
+					move(cur_y, cur_x);
+					
+				}
+				
+				else if (s[0] != '\n') {
+					addch(s[0]);
+					cur_x++;
+				}
+			}
+		}
+		else if (FD_ISSET(read_network_fd, &input_set)) {
+			if (read(read_network_fd, s, sizeof(s)) != -1) {
+				network_print(s, scroll, log_screen);
+			}
 		}
 		refresh();
 	}

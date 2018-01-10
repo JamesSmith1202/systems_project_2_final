@@ -3,6 +3,9 @@
 
 #include<unistd.h>
 #include<fcntl.h>
+#include<sys/select.h>
+#include<sys/time.h>
+#include<sys/types.h>
 
 //fd's for pipes
 #define FD_READ		0
