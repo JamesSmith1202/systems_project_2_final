@@ -5,11 +5,14 @@
 #define MT_COMMAND 0
 #define MT_MESSAGE 1
 
-//max length of message
+//max length of a user sent message
 #define MSG_MAX_LEN	256
 
 //max username length
 #define USER_MAX_LEN	32
+
+//max length for a server sent mesage
+#define SERVER_MAX_LEN	8192
 
 /*
 	commands the user can use (ideas):
