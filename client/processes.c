@@ -7,6 +7,7 @@
 
 //TODO actually limit input bounds
 //TODO a stretch, but factor out the network write calls to a single function
+//TODO network process: use select on write_fd and read_fd
 
 //used by main process to print data from network
 void network_print(char *data, CDKSWINDOW *scroll, CDKSCREEN *screen) {
@@ -265,14 +266,22 @@ void network_process(int read_fd, int write_fd) {
 	char username[USER_MAX_LEN];
 	sprintf(message, "please enter a username (max 32 characters)\n");
 	write(write_fd, message, strlen(message));
-	read(read_fd, message, 32);
+	read(read_fd, username, 32);
 	//check if username is unique
+	sprintf(message, "Username entered: %s\n", username);
 	write(write_fd, message, strlen(message));
 	
 	int bytes;
+	struct client_message outgoing;
+	struct server_message incoming;
 	memset(message, 0, sizeof(message));
 	//wait for user input data to come in
 	while( read(read_fd, message, sizeof(message)) != -1 ) {
+		memset(outgoing, 0, sizeof(outgoing));
+		memset(incoming, 0, sizeof(incoming));
+		
+		package_message();
+
 		bytes = send(my_fd, message, strlen(message), 0);
 		if (bytes == -1) {
 			sprintf(message, "Write failed\n");

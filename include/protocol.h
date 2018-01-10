@@ -21,6 +21,7 @@
 	!leave:			leave the current room
 	!msg <room> <message>:	message the indicated room
 	!history:		see a log of the messages in the current room
+	!help:			lists all available commands
 */
 
 struct client_message{ //the message the client sends to server
