@@ -31,3 +31,6 @@ user can now connect by typing an ip/port combination
 linS -- 2018-01-07 15:04:01
 cleanup
 
+smithJ -- 2018-01-10 15:36:04
+wrote server code and worked on header. going to do multiplexing tomorrow
+
