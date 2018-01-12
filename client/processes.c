@@ -11,16 +11,13 @@
 
 //used by main process to print data from network
 void network_print(char *data, CDKSWINDOW *scroll, CDKSCREEN *screen) {
-	char *tok = (char *)malloc(128);
+	char *tok;
 	
 	while( (tok = strsep(&data, "\n")) != 0) {
 		if (tok[0] != '\n') addCDKSwindow(scroll, tok, BOTTOM);
 	}
 	
 	refreshCDKScreen(screen);
-	
-	free(tok);
-	tok = 0;
 }
 
 void graphics_process(int read_cursor_fd, int read_network_fd) {
@@ -73,40 +70,6 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 	getyx(stdscr, cur_y, cur_x);
 	refresh();
 	refreshCDKScreen(log_screen);
-	/*
-	while(1) {
-		memset(s, 0, sizeof(s));
-		if (read(read_cursor_fd, s, sizeof(s)) != -1) {
-			if (s[0] == '\n') {
-				while (cur_x > 1) {
-					move(cur_y, --cur_x);
-					addch(' ');
-					move(cur_y, cur_x);
-				}
-			}
-			//else if (s[0] == KEY_BACKSPACE) {
-			else if (s[0] == 127) {
-				if (cur_x > 1) {
-					move(cur_y, --cur_x);
-				}
-				addch(' ');
-				move(cur_y, cur_x);
-				
-			}
-			
-			else if (s[0] != '\n') {
-				addch(s[0]);
-				cur_x++;
-			}
-		}
-		
-		memset(s, 0, sizeof(s));
-		if (read(read_network_fd, s, sizeof(s)) != -1) {
-			network_print(s, scroll, log_screen);
-		}
-		refresh();
-	}
-	*/
 	
 	//create a set of fds
 	fd_set input_set;
@@ -187,7 +150,7 @@ void input_process(int write_cursor_fd, int write_input_fd) {
 		break;
 		
 		default:
-			if (index < max_x-2) {
+			if (index < max_x-2 && index < MSG_MAX_LEN) {
 				str_buf[index++] = c;
 				write(write_cursor_fd, &c, sizeof(char));
 			}
@@ -275,13 +238,33 @@ void network_process(int read_fd, int write_fd) {
 	struct client_message outgoing;
 	struct server_message incoming;
 	memset(message, 0, sizeof(message));
+	
+	fd_set readfds;
+	
 	//wait for user input data to come in
 	while( read(read_fd, message, sizeof(message)) != -1 ) {
 		memset(outgoing, 0, sizeof(outgoing));
 		memset(incoming, 0, sizeof(incoming));
 		
+		FD_ZERO(readfds);
+		FD_SET(read_fd, &readfds);
+		FD_SET(my_fd, &readfds);
+		
+		int max = (read_fd > my_fd) ? read_fd : my_fd;
+		select(max + 1, readfds, 0, 0, 0);
+		
+		if (FD_ISSET(read_fd, &readfds)) {
+			
+		}
+		else if (FD_ISSET(my_fd, &readfds)) {
+			
+		}
+		/*
+		memset(outgoing, 0, sizeof(outgoing));
+		memset(incoming, 0, sizeof(incoming));
+		
 		package_message();
-
+		*/
 		bytes = send(my_fd, message, strlen(message), 0);
 		if (bytes == -1) {
 			sprintf(message, "Write failed\n");
