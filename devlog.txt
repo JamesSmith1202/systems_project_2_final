@@ -37,3 +37,6 @@ wrote server code and worked on header. going to do multiplexing tomorrow
 linS -- 2018-01-10 15:29:33
 added select to network process
 
+linS -- 2018-01-17 15:28:47
+some client work
+

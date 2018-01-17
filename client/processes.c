@@ -242,22 +242,31 @@ void network_process(int read_fd, int write_fd) {
 	fd_set readfds;
 	
 	//wait for user input data to come in
-	while( read(read_fd, message, sizeof(message)) != -1 ) {
-		memset(outgoing, 0, sizeof(outgoing));
-		memset(incoming, 0, sizeof(incoming));
+	while( /*read(read_fd, message, sizeof(message)) != -1*/ 1) {
+		memset(&outgoing, 0, sizeof(outgoing));
+		memset(&incoming, 0, sizeof(incoming));
 		
-		FD_ZERO(readfds);
+		FD_ZERO(&readfds);
 		FD_SET(read_fd, &readfds);
 		FD_SET(my_fd, &readfds);
 		
 		int max = (read_fd > my_fd) ? read_fd : my_fd;
-		select(max + 1, readfds, 0, 0, 0);
+		
+		//wait for either socket read data or user input data
+		select(max + 1, &readfds, 0, 0, 0);
 		
 		if (FD_ISSET(read_fd, &readfds)) {
-			
+			if (read(read_fd, message, sizeof(message)) != -1) {
+				write(write_fd, message, strlen(message));
+			}
 		}
 		else if (FD_ISSET(my_fd, &readfds)) {
+			bytes = recv(my_fd, message, sizeof(message), 0);
 			
+			if (bytes == -1) {
+				sprintf(message, "Network read failed\n");
+			}
+			write(write_fd, message, strlen(message));
 		}
 		/*
 		memset(outgoing, 0, sizeof(outgoing));
@@ -265,6 +274,7 @@ void network_process(int read_fd, int write_fd) {
 		
 		package_message();
 		*/
+		/*
 		bytes = send(my_fd, message, strlen(message), 0);
 		if (bytes == -1) {
 			sprintf(message, "Write failed\n");
@@ -273,6 +283,7 @@ void network_process(int read_fd, int write_fd) {
 		bytes = recv(my_fd, message, sizeof(message), 0);
 		write(write_fd, message, strlen(message));
 		memset(message, 0, sizeof(message));
+		*/
 	}
 }
 
