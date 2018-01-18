@@ -40,3 +40,6 @@ added select to network process
 linS -- 2018-01-17 15:28:47
 some client work
 
+siuR -- 2018-01-18 15:15:46
+Add logging capabilities for server to maintain chatrooms
+
