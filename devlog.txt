@@ -46,3 +46,6 @@ some work on protocol handling
 siuR -- 2018-01-18 15:15:46
 Add logging capabilities for server to maintain chatrooms
 
+smithJ -- 2018-01-18 15:33:26
+restructured the protocols to have fixed lengths. Looked into select for connections, reading, and writing
+

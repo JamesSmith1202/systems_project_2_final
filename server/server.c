@@ -26,6 +26,9 @@ int sendHelper(int sockfd, const char *msg) //streamlines the sending
     return stat;
 }
 
+//scans the server socket for connections and accepts them
+int select_accept{}
+
 int main()
 {
     printf("Starting server setup...\n");
@@ -98,10 +101,11 @@ int main()
     int new_fd;                          //new connection put on new_fd
     char s[INET6_ADDRSTRLEN];            // string that is the length of an ipv6 address
     client_addr_size = sizeof(client_addr);
-    
+    struct chat_room room;
     while (true) //infinite serving loop
     {
-        new_fd = accept(listenSocketfd, (struct sockaddr *)&client_addr, &client_addr_size); //accept new connection and save the socket fd for this connection
+      select
+      new_fd = accept(listenSocketfd, (struct sockaddr *)&client_addr, &client_addr_size); //accept new connection and save the socket fd for this connection
         if (new_fd == -1) //check for error
         {
             perror("accept");
