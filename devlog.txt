@@ -43,3 +43,6 @@ some client work
 linS -- 2018-01-18 15:10:55
 some work on protocol handling
 
+siuR -- 2018-01-18 15:15:46
+Add logging capabilities for server to maintain chatrooms
+
