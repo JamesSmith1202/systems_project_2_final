@@ -24,17 +24,6 @@
 	!help:			lists all available commands
 */
 
-/*
-Some notes:
-
-If message_type is MT_COMMAND:
-	if the command is !msg, then chatroom will be non-null
-	otherwise, chatroom will be null
-
-If message_type is MT_MESSAGE:
-	chatroom will be null
-
-*/
 struct client_message{ //the message the client sends to server
 	unsigned short message_type;//command vs message
 	char *chatroom;//message destination
