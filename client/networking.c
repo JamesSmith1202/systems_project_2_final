@@ -33,3 +33,25 @@ int valid_connection(int write_fd, struct addrinfo hint, struct addrinfo **data,
 	return 1;
 }
 
+void pack_message(struct client_message *outgoing, char *msg, char *username) {
+	if (strlen(msg) < 1) return 0;
+	
+	if (msg[0] == '!') {
+		outgoing->message_type = MT_COMMAND;
+		
+		
+	}
+	else {
+		outgoing->message_type = MT_MESSAGE;
+	}
+	
+	outgoing->username = username;
+	outgoing->message = msg;
+}
+
+void unpack_message(struct server_message *incoming, char *msg) {
+	
+}
+
+
+

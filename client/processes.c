@@ -257,11 +257,14 @@ void network_process(int read_fd, int write_fd) {
 		
 		if (FD_ISSET(read_fd, &readfds)) {
 			if (read(read_fd, message, sizeof(message)) != -1) {
-				write(write_fd, message, strlen(message));
+				pack_message(&outgoing, message);
+				
+				bytes = send(my_fd, &outgoing, sizeof(outgoing), 0);
 			}
 		}
 		else if (FD_ISSET(my_fd, &readfds)) {
-			bytes = recv(my_fd, message, sizeof(message), 0);
+			bytes = recv(my_fd, &incoming, sizeof(incoming), 0);
+			unpack_message(&incoming, message);
 			
 			if (bytes == -1) {
 				sprintf(message, "Network read failed\n");
