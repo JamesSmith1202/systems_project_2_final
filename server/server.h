@@ -14,4 +14,3 @@
 
 #define MYPORT "3490"   //Port to listen on
 #define BACKLOG 1000    //number of connections allowed on the incoming queue
-#define RECVBUFFER 3000 //the buffer size for receiving data from client

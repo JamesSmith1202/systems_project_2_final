@@ -33,20 +33,37 @@ int valid_connection(int write_fd, struct addrinfo hint, struct addrinfo **data,
 	return 1;
 }
 
-void pack_message(struct client_message *outgoing, char *msg, char *username) {
+void pack_message(struct client_message *outgoing, char *msg,
+		char *username, char *chatroom) {
 	if (strlen(msg) < 1) return 0;
 	
 	if (msg[0] == '!') {
-		outgoing->message_type = MT_COMMAND;
+		strncpy(outgoing->message_type, MT_COMMAND,);
+		//outgoing->message_type = MT_COMMAND;
 		
+		char token[64];
+		char copy[MSG_MAX_LEN];
 		
+		//strip the '!'
+		memmove(copy, msg+1, MSG_MAX_LEN - 1);
+		token = strsep(&copy, " ");
+		
+		if (!strcmp(copy, "msg")) {
+			//get the target chatroom name
+			token = strsep(&copy, " ");
+			
+			strncpy(outgoing->chatroom, token, strlen(token)+1);
+		}
 	}
 	else {
 		outgoing->message_type = MT_MESSAGE;
+		outgoing->chatroom = chatroom;
+		strncpy(outgoing->message_type, ,);
 	}
 	
-	outgoing->username = username;
-	outgoing->message = msg;
+	strncpy(outgoing->username, username, strlen(username));
+	strncpy(outgoing->message, msg, strlen(msg));
+	strncpy(outgoing->, ,);
 }
 
 void unpack_message(struct server_message *incoming, char *msg) {

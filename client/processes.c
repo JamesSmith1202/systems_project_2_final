@@ -227,6 +227,7 @@ void network_process(int read_fd, int write_fd) {
 	
 	//username creation loop
 	char username[USER_MAX_LEN];
+	char chatroom[USER_MAX_LEN];
 	sprintf(message, "please enter a username (max 32 characters)\n");
 	write(write_fd, message, strlen(message));
 	read(read_fd, username, 32);
@@ -257,7 +258,8 @@ void network_process(int read_fd, int write_fd) {
 		
 		if (FD_ISSET(read_fd, &readfds)) {
 			if (read(read_fd, message, sizeof(message)) != -1) {
-				pack_message(&outgoing, message);
+				pack_message(&outgoing, message,
+					username, chatroom);
 				
 				bytes = send(my_fd, &outgoing, sizeof(outgoing), 0);
 			}
@@ -271,22 +273,6 @@ void network_process(int read_fd, int write_fd) {
 			}
 			write(write_fd, message, strlen(message));
 		}
-		/*
-		memset(outgoing, 0, sizeof(outgoing));
-		memset(incoming, 0, sizeof(incoming));
-		
-		package_message();
-		*/
-		/*
-		bytes = send(my_fd, message, strlen(message), 0);
-		if (bytes == -1) {
-			sprintf(message, "Write failed\n");
-			write(write_fd, message, strlen(message));
-		}
-		bytes = recv(my_fd, message, sizeof(message), 0);
-		write(write_fd, message, strlen(message));
-		memset(message, 0, sizeof(message));
-		*/
 	}
 }
 

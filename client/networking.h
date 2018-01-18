@@ -19,7 +19,8 @@ int valid_connection(int write_fd, struct addrinfo hint, struct addrinfo **data,
 		char *ip, char *port);
 
 //packs client message as per the protocol
-void pack_message(struct client_message *outgoing, char *msg);
+void pack_message(struct client_message *outgoing, char *msg,
+	char *username, char *chatroom);
 
 //packs message from server as per the protocol
 void unpack_message(struct server_message *incoming, char *msg);
