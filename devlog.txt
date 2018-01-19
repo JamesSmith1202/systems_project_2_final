@@ -55,6 +55,9 @@ more work
 siuR -- 2018-01-19 15:23:04
 Change logging to log to separate directories (chatrooms) and files for each day
 
+linS -- 2018-01-19 15:27:31
+testing packaging function
+
 siuR -- 2018-01-19 15:34:21
 Add log reading function
 
