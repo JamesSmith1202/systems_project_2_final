@@ -235,6 +235,10 @@ void network_process(int read_fd, int write_fd) {
 	sprintf(message, "Username entered: %s\n", username);
 	write(write_fd, message, strlen(message));
 	
+	/*
+		ADD GETTING CHATROOM STUFF
+	*/
+	
 	int bytes;
 	struct client_message outgoing;
 	struct server_message incoming;

@@ -52,3 +52,6 @@ restructured the protocols to have fixed lengths. Looked into select for connect
 linS -- 2018-01-18 15:29:43
 more work
 
+linS -- 2018-01-19 15:27:31
+testing packaging function
+

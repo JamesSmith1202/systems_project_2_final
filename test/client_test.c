@@ -1,37 +1,34 @@
-#include"../include/protocol.h"
-#include"networking.h"
+#include <stdio.h>
+#include<string.h>
+#include<stdlib.h>
 
-void print_addr_list(int write_fd, struct addrinfo *data) {
-	char message[MSG_MAX_LEN];
-	char addr_temp[128];
 
-	while (data != 0) {
-		struct sockaddr_in *ip = (struct sockaddr_in *)data->ai_addr;
-		
-		//pretty printing
-		inet_ntop(AF_INET, &(ip->sin_addr), addr_temp, data->ai_addrlen);
-		
-		sprintf(message, "IP result: %s\n", addr_temp);
-		write(write_fd, message, strlen(message));
-		
-		data = data->ai_next;
-	}
-}
+//message type
+#define MT_COMMAND 0
+#define MT_MESSAGE 1
 
-int valid_connection(int write_fd, struct addrinfo hint, struct addrinfo **data,
-		char *ip, char *port) {
-	int res;
-	char message[MSG_MAX_LEN];
-	
-	if ( (res = getaddrinfo(ip, port, &hint, data)) != 0) {
-		sprintf(message, "%s\n", gai_strerror(res));
-		write(write_fd, message, strlen(message));
-		
-		return 0;
-	}
-	
-	return 1;
-}
+//max length of a user sent message
+#define MSG_MAX_LEN	256
+
+//max username length
+#define USER_MAX_LEN	32
+
+//max length for a server sent mesage
+#define SERVER_MAX_LEN	8192
+
+//max length for a chatroom's name
+#define CHATROOM_MAX_LEN 32
+
+//max number of users in one chat room
+#define MAX_USERS	16
+
+
+struct client_message{ //the message the client sends to server
+	unsigned short message_type;//command vs message
+        char chatroom[CHATROOM_MAX_LEN];//message destination
+	char username[USER_MAX_LEN]; //display name
+        char message[MSG_MAX_LEN];
+};
 /*
 void pack_message(struct client_message *outgoing, char *msg,
 		char *username, char *chatroom) {
@@ -39,6 +36,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 	
 	if (msg[0] == '!') {
 		outgoing->message_type = MT_COMMAND;
+		printf("! found\n");
 		
 		char *token, *temp;
 		char copy[MSG_MAX_LEN];
@@ -46,12 +44,16 @@ void pack_message(struct client_message *outgoing, char *msg,
 		//strip the '!'
 		memmove(copy, msg+1, strlen(msg) - 1);
 		temp = copy;
+		printf("%s\n", copy);
 		
 		token = strsep(&temp, " ");
+		printf("%s\n", token);
 		
 		if (!strcmp(copy, "msg")) {
+			printf("in msg\n");
 			//get the target chatroom name
 			token = strsep(&temp, " ");
+			printf("%s\n", token);
 			
 			strncpy(outgoing->chatroom, token, strlen(token)+1);
 		}
@@ -70,6 +72,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 	if (strlen(msg) < 1) return;
 	
 	if (msg[0] == '!') {
+		printf("found !\n");
 		outgoing->message_type = MT_COMMAND;
 		
 		char *token, *temp;
@@ -80,10 +83,21 @@ void pack_message(struct client_message *outgoing, char *msg,
 		temp = copy;
 		
 		token = strsep(&temp, " ");
+		printf("%s\n", token);
+		if (token == 0 || strlen(token) < 1) {
+			printf("no arg\n");
+			memset(&outgoing, 0, sizeof(outgoing));
+			return;
+		}
 		
 		if (!strcmp(copy, "msg")) {
 			//get the target chatroom name
 			token = strsep(&temp, " ");
+			if (token == 0) {
+				printf("no room\n");
+				memset(&outgoing, 0, sizeof(outgoing));
+				return;
+			}
 			
 			strncpy(outgoing->chatroom, token, strlen(token)+1);
 		}
@@ -97,9 +111,21 @@ void pack_message(struct client_message *outgoing, char *msg,
 	strncpy(outgoing->message, msg, strlen(msg)+1);
 }
 
-void unpack_message(struct server_message *incoming, char *msg) {
-	
+int main(void) {
+    struct client_message out;
+    char msg[MSG_MAX_LEN];
+    char user[USER_MAX_LEN];
+    char chat[CHATROOM_MAX_LEN];
+    
+    strncpy(msg, "!", 2);
+    strncpy(user, "Bob", 4);
+    strncpy(chat, "room", 5);
+    
+    pack_message(&out, msg, user, chat);
+    
+    printf("%d: %s, %s, %s\n", out.message_type, out.chatroom, out.username, out.message);
+    
+	return 0;
 }
-
 
 
