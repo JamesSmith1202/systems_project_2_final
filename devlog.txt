@@ -61,3 +61,6 @@ testing packaging function
 siuR -- 2018-01-19 15:34:21
 Add log reading function
 
+smithJ -- 2018-01-19 15:37:50
+finished listening using select
+

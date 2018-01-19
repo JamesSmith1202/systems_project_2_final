@@ -26,8 +26,30 @@ int sendHelper(int sockfd, const char *msg) //streamlines the sending
     return stat;
 }
 
-//scans the server socket for connections and accepts them
-int select_accept{}
+//scans the server socket for connections and accepts them -- PROBLEM: NO WAY TO RETURN ACCEPTED SOCKET FD'S!
+void scan_accept(int listen_sock, fd_set *set, struct sockaddr_storage *client_addr , socklen_t *client_addr_size){
+  int new_fd;
+  int status;
+  char s[INET6_ADDRSTRLEN]; 
+  FD_ZERO(set);
+  FD_SET(listen_sock, set);//add the listening socket to the set
+  status = select(listen_sock + 1, set, NULL, NULL, NULL);//check for client connections
+  if(status == -1){
+    perror("select");
+  }
+  if(status > 0){//if there is at least 1...
+    int i;
+    for(i = status; i > 0; i--){//iterate through until there are 0 left
+      new_fd = accept(listenSocketfd, (struct sockaddr *)client_addr, client_addr_size); //accept new connection and save the socket fd for this connection
+      if (new_fd == -1) //check for error
+	{
+	  perror("accept");
+	}
+      inet_ntop(client_addr.ss_family, get_in_addr((struct sockaddr *)&client_addr), s, sizeof(s));//convert to human form
+      printf("Connection received from %s\n", s);
+    }
+  }
+}
 
 int main()
 {
@@ -96,23 +118,15 @@ int main()
     //int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 
     //main accept loop
+    fd_set accept_set;
     struct sockaddr_storage client_addr; //connector's address information
     socklen_t client_addr_size;          //size of the peer
     int new_fd;                          //new connection put on new_fd
-    char s[INET6_ADDRSTRLEN];            // string that is the length of an ipv6 address
     client_addr_size = sizeof(client_addr);
     struct chat_room room;
     while (true) //infinite serving loop
     {
-      select
-      new_fd = accept(listenSocketfd, (struct sockaddr *)&client_addr, &client_addr_size); //accept new connection and save the socket fd for this connection
-        if (new_fd == -1) //check for error
-        {
-            perror("accept");
-            continue;
-        }
-        inet_ntop(client_addr.ss_family, get_in_addr((struct sockaddr *)&client_addr), s, sizeof(s));
-        printf("Connection received from %s\n", s);
+      scan_select(listenSocketfd, &accept_set, &client_addr, &client_addr_size);
     }
     return 0;
 }
