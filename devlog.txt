@@ -52,3 +52,9 @@ restructured the protocols to have fixed lengths. Looked into select for connect
 linS -- 2018-01-18 15:29:43
 more work
 
+siuR -- 2018-01-19 15:23:04
+Change logging to log to separate directories (chatrooms) and files for each day
+
+siuR -- 2018-01-19 15:34:21
+Add log reading function
+
