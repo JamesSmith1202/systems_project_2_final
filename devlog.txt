@@ -64,3 +64,6 @@ Add log reading function
 smithJ -- 2018-01-19 15:37:50
 finished listening using select
 
+linS -- 2018-01-21 16:49:31
+cleanup and client connection debugging
+

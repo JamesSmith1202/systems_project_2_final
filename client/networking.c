@@ -32,12 +32,13 @@ int valid_connection(int write_fd, struct addrinfo hint, struct addrinfo **data,
 	
 	return 1;
 }
-/*
+
 void pack_message(struct client_message *outgoing, char *msg,
 		char *username, char *chatroom) {
 	if (strlen(msg) < 1) return;
 	
 	if (msg[0] == '!') {
+		//printf("found !\n");
 		outgoing->message_type = MT_COMMAND;
 		
 		char *token, *temp;
@@ -48,42 +49,23 @@ void pack_message(struct client_message *outgoing, char *msg,
 		temp = copy;
 		
 		token = strsep(&temp, " ");
-		
-		if (!strcmp(copy, "msg")) {
-			//get the target chatroom name
-			token = strsep(&temp, " ");
+		printf("%s\n", token);
+		if (token == 0 || strlen(token) < 1) {
+			//printf("no arg\n");
 			
-			strncpy(outgoing->chatroom, token, strlen(token)+1);
+			outgoing->message_type = MT_ERR;
+			
+			return;
 		}
-	}
-	else {
-		outgoing->message_type = MT_MESSAGE;
-		strncpy(outgoing->chatroom, chatroom, sizeof(chatroom));
-	}
-	
-	strncpy(outgoing->username, username, strlen(username));
-	strncpy(outgoing->message, msg, strlen(msg)+1);
-}
-*/
-void pack_message(struct client_message *outgoing, char *msg,
-		char *username, char *chatroom) {
-	if (strlen(msg) < 1) return;
-	
-	if (msg[0] == '!') {
-		outgoing->message_type = MT_COMMAND;
-		
-		char *token, *temp;
-		char copy[MSG_MAX_LEN];
-		
-		//strip the '!'
-		memmove(copy, msg+1, strlen(msg) - 1);
-		temp = copy;
-		
-		token = strsep(&temp, " ");
 		
 		if (!strcmp(copy, "msg")) {
 			//get the target chatroom name
 			token = strsep(&temp, " ");
+			if (token == 0) {
+				//printf("no room\n");
+				memset(&outgoing, 0, sizeof(outgoing));
+				return;
+			}
 			
 			strncpy(outgoing->chatroom, token, strlen(token)+1);
 		}

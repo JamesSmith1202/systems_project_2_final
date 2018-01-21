@@ -180,8 +180,8 @@ void network_process(int read_fd, int write_fd) {
 	hint.ai_family = AF_INET;
 	hint.ai_socktype = SOCK_STREAM;
 	
-	char ip[64];
-	char port[16];
+	char ip[MSG_MAX_LEN];
+	char port[MSG_MAX_LEN];
 	int my_fd, status;
 	
 	//initial connection loop
@@ -192,12 +192,14 @@ void network_process(int read_fd, int write_fd) {
 			
 			sprintf(message, "Please enter an ip address\n");
 			write(write_fd, message, strlen(message));
-			read(read_fd, ip, sizeof(ip));
+			read(read_fd, ip, sizeof(ip)-1);
+			ip[63] = 0;
 			if (strchr(ip, '\n') != 0) *strchr(ip, '\n') = 0;
 
 			sprintf(message, "Now enter the port\n");
 			write(write_fd, message, strlen(message));
-			read(read_fd, port, sizeof(port));
+			read(read_fd, port, sizeof(port)-1);
+			port[15] = 0;
 			if (strchr(port, '\n') != 0) *strchr(port, '\n') = 0;
 			
 			sprintf(message, "Checking for validity: %s:%s\n", ip, port);
@@ -208,8 +210,8 @@ void network_process(int read_fd, int write_fd) {
 		//debugging, print all returned addresses
 		print_addr_list(write_fd, data);
 		
-		int my_fd = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
-		//if (my_fd == -1)
+		//attempt to connect with the ip/port
+		my_fd = socket(data->ai_family, data->ai_socktype, data->ai_protocol);
 		sprintf(message, "Created socket with fd: %d\n", my_fd);
 		write(write_fd, message, strlen(message));
 		
@@ -262,18 +264,28 @@ void network_process(int read_fd, int write_fd) {
 		
 		if (FD_ISSET(read_fd, &readfds)) {
 			if (read(read_fd, message, sizeof(message)) != -1) {
+				sprintf(message, "user read success\n");
+				/*
 				pack_message(&outgoing, message,
 					username, chatroom);
 				
 				bytes = send(my_fd, &outgoing, sizeof(outgoing), 0);
+				*/
 			}
+			else {
+				sprintf(message, "user read failed\n");
+			}
+			write(write_fd, message, strlen(message));
 		}
 		else if (FD_ISSET(my_fd, &readfds)) {
 			bytes = recv(my_fd, &incoming, sizeof(incoming), 0);
-			unpack_message(&incoming, message);
+			//unpack_message(&incoming, message);
 			
 			if (bytes == -1) {
 				sprintf(message, "Network read failed\n");
+			}
+			else {
+				sprintf(message, "Network read success\n");
 			}
 			write(write_fd, message, strlen(message));
 		}

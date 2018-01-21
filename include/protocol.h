@@ -2,8 +2,9 @@
 #define PROTOCOL_H
 
 //message type
-#define MT_COMMAND 0
-#define MT_MESSAGE 1
+#define MT_COMMAND	0
+#define MT_MESSAGE	1
+#define MT_ERR		65535
 
 //max length of a user sent message
 #define MSG_MAX_LEN	256

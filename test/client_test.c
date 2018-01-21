@@ -4,8 +4,9 @@
 
 
 //message type
-#define MT_COMMAND 0
-#define MT_MESSAGE 1
+#define MT_COMMAND	0
+#define MT_MESSAGE	1
+#define MT_ERR		65535
 
 //max length of a user sent message
 #define MSG_MAX_LEN	256
@@ -67,6 +68,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 	strncpy(outgoing->message, msg, strlen(msg)+1);
 }
 */
+
 void pack_message(struct client_message *outgoing, char *msg,
 		char *username, char *chatroom) {
 	if (strlen(msg) < 1) return;
@@ -86,7 +88,9 @@ void pack_message(struct client_message *outgoing, char *msg,
 		printf("%s\n", token);
 		if (token == 0 || strlen(token) < 1) {
 			printf("no arg\n");
-			memset(&outgoing, 0, sizeof(outgoing));
+			
+			outgoing->message_type = MT_ERR;
+			
 			return;
 		}
 		
@@ -117,7 +121,7 @@ int main(void) {
     char user[USER_MAX_LEN];
     char chat[CHATROOM_MAX_LEN];
     
-    strncpy(msg, "!", 2);
+    strncpy(msg, "!msg rose hello", 100);
     strncpy(user, "Bob", 4);
     strncpy(chat, "room", 5);
     

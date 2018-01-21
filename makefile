@@ -1,4 +1,4 @@
-client-objs = client.o processes.o networking.o parse.o
+client-objs = client.o processes.o networking.o
 client-libs = -l ncurses -l cdk
 
 all:
@@ -12,7 +12,6 @@ client-debug:
 	gcc -g -c client/client.c client/processes.h
 	gcc -g -c client/processes.c include/protocol.h client/processes.h client/networking.h
 	gcc -g -c client/networking.c client/networking.h include/protocol.h
-	gcc -g -c util/parse.c include/parse.h
 	gcc -o $(client-objs) $(client-libs)
 
 client: $(client-objs)
@@ -20,9 +19,6 @@ client: $(client-objs)
 
 server: server.o
 	gcc -o server_run server.o
-
-server.o: server/server.c include/protocol.h
-	gcc -c server/server.c include/protocol.h
 
 client.o: client/client.c client/processes.h
 	gcc -c client/client.c client/processes.h
@@ -33,14 +29,11 @@ processes.o: client/processes.c include/protocol.h client/processes.h client/net
 networking.o: client/networking.c client/networking.h include/protocol.h
 	gcc -c client/networking.c client/networking.h include/protocol.h
 
-parse.o: util/parse.c include/parse.h
-	gcc -c util/parse.c include/parse.h
+server.o: server/server.c include/protocol.h
+	gcc -c server/server.c include/protocol.h
 
 clean:
 	rm -f *~
 	rm -f *.o
-	rm -f client_run server_run prototype
-
-client_proto: proj_proto.c
-	gcc -o prototype proj_proto.c -l ncurses -l cdk
+	rm -f client_run server_run
 
