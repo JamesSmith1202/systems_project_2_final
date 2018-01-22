@@ -80,7 +80,26 @@ void pack_message(struct client_message *outgoing, char *msg,
 }
 
 void unpack_message(struct server_message *incoming, char *msg) {
+	char server[] = "[SERVER]";
+	char error[] = "[ERROR]";
+	char delim[] = ": ";
 	
+	switch(incoming->message_type) {
+		case MT_COMMAND:
+			strncat(msg, server, strlen(server));
+		break;
+		
+		case MT_MESSAGE:
+			strncat(msg, incoming->username, strlen(incoming->username));
+		break;
+		
+		case MT_ERR:
+			strncat(msg, error, strlen(error));
+		break;
+	}
+	
+	strncat(msg, delim, strlen(delim));
+	strncat(msg, incoming->message, strlen(incoming->message));
 }
 
 

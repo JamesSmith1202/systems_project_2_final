@@ -1,5 +1,5 @@
 #include "server.h"
-#include "protocol.h"
+#include "../include/protocol.h"
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)

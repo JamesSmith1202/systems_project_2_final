@@ -67,3 +67,6 @@ finished listening using select
 linS -- 2018-01-21 16:49:31
 cleanup and client connection debugging
 
+linS -- 2018-01-22 16:10:07
+fixed user chat display bug?
+

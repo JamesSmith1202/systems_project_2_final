@@ -1,20 +1,18 @@
 #include<cdk/cdk.h>
 
 #include"../include/protocol.h"
-#include"../include/parse.h"
 #include"networking.h"
 #include"processes.h"
 
 //TODO actually limit input bounds
 //TODO a stretch, but factor out the network write calls to a single function
-//TODO network process: use select on write_fd and read_fd
 
 //used by main process to print data from network
 void network_print(char *data, CDKSWINDOW *scroll, CDKSCREEN *screen) {
 	char *tok;
 	
 	while( (tok = strsep(&data, "\n")) != 0) {
-		if (tok[0] != '\n') addCDKSwindow(scroll, tok, BOTTOM);
+		if (tok[0] != '\n' && strcmp(tok, "")) addCDKSwindow(scroll, tok, BOTTOM);
 	}
 	
 	refreshCDKScreen(screen);
