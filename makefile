@@ -37,3 +37,7 @@ clean:
 	rm -f *.o
 	rm -f client_run server_run
 
+build-test:
+	gcc -o test-client test/client_test.c
+	gcc -o test-serv test/serv.c
+

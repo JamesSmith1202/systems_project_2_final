@@ -3,6 +3,7 @@
 
 client_run
 server_run
+test-*
 
 # Prerequisites
 *.d

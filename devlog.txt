@@ -70,3 +70,6 @@ cleanup and client connection debugging
 linS -- 2018-01-22 16:10:07
 fixed user chat display bug?
 
+linS -- 2018-01-22 16:45:50
+graphical enhancements
+

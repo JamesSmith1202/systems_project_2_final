@@ -54,9 +54,9 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 	scroll = newCDKSwindow(
 		log_screen,
 		1, 1,
-		log_height-2, log_width,
-		"Chat log",
-		18,
+		log_height-1, log_width,
+		0,
+		log_height-2,
 		1,
 		0
 	);
@@ -111,6 +111,7 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 			if (read(read_network_fd, s, sizeof(s)) != -1) {
 				network_print(s, scroll, log_screen);
 			}
+			refreshCDKScreen(input_screen);
 		}
 		refresh();
 	}
@@ -170,7 +171,7 @@ network process will package message into the protocol
 network process will handle response message
 */
 void network_process(int read_fd, int write_fd) {
-	char message[MSG_MAX_LEN];
+	char message[SERVER_MAX_LEN*2];
 	
 	struct addrinfo hint, *data;
 	memset(&hint, 0, sizeof(struct addrinfo));
@@ -226,12 +227,15 @@ void network_process(int read_fd, int write_fd) {
 	while ( status == -1);
 	
 	//username creation loop
-	char username[USER_MAX_LEN];
+	char username[USER_MAX_LEN+1];
 	char chatroom[USER_MAX_LEN];
+	
 	sprintf(message, "please enter a username (max 32 characters)\n");
 	write(write_fd, message, strlen(message));
-	read(read_fd, username, 32);
-	//check if username is unique
+	
+	read(read_fd, username, USER_MAX_LEN);
+	username[USER_MAX_LEN] = 0;
+	
 	sprintf(message, "Username entered: %s\n", username);
 	write(write_fd, message, strlen(message));
 	
@@ -242,7 +246,6 @@ void network_process(int read_fd, int write_fd) {
 	int bytes;
 	struct client_message outgoing;
 	struct server_message incoming;
-	memset(message, 0, sizeof(message));
 	
 	fd_set readfds;
 	
@@ -250,6 +253,7 @@ void network_process(int read_fd, int write_fd) {
 	while( /*read(read_fd, message, sizeof(message)) != -1*/ 1) {
 		memset(&outgoing, 0, sizeof(outgoing));
 		memset(&incoming, 0, sizeof(incoming));
+		memset(message, 0, sizeof(message));
 		
 		FD_ZERO(&readfds);
 		FD_SET(read_fd, &readfds);
@@ -261,7 +265,7 @@ void network_process(int read_fd, int write_fd) {
 		select(max + 1, &readfds, 0, 0, 0);
 		
 		if (FD_ISSET(read_fd, &readfds)) {
-			if (read(read_fd, message, sizeof(message)) != -1) {
+			if (read(read_fd, message, MSG_MAX_LEN) != -1) {
 				sprintf(message, "user read success\n");
 				/*
 				pack_message(&outgoing, message,
@@ -277,14 +281,16 @@ void network_process(int read_fd, int write_fd) {
 		}
 		else if (FD_ISSET(my_fd, &readfds)) {
 			bytes = recv(my_fd, &incoming, sizeof(incoming), 0);
-			//unpack_message(&incoming, message);
+			unpack_message(&incoming, message);
 			
 			if (bytes == -1) {
 				sprintf(message, "Network read failed\n");
 			}
+			/*
 			else {
 				sprintf(message, "Network read success\n");
 			}
+			*/
 			write(write_fd, message, strlen(message));
 		}
 	}
