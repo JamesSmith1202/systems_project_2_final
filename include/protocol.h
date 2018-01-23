@@ -31,25 +31,28 @@
 	!help:			lists all available commands
 */
 
+/*
+reason why the strings are +1 length is for the null terminator
+*/
 
 struct client_message{ //the message the client sends to server
     unsigned short message_type;//command vs message
-    char chatroom[CHATROOM_MAX_LEN];//message destination
-    char username[USER_MAX_LEN]; //display name
-    char message[MSG_MAX_LEN];
+    char chatroom[CHATROOM_MAX_LEN+1];//message destination
+    char username[USER_MAX_LEN+1]; //display name
+    char message[MSG_MAX_LEN+1];
 };
 
 //a chat room on the server. We will have a list of these
 struct chat_room{
-    char name[CHATROOM_MAX_LEN];//server name
+    char name[CHATROOM_MAX_LEN+1];//server name
     int users[MAX_USERS];//list of client socket fd’s
     int num_users; //number of users currently connected
 };
 
 struct server_message{//received by client to display to user
     unsigned short message_type;//message vs return value of command
-    char username[USER_MAX_LEN]; //display name
-    char message[SERVER_MAX_LEN];
+    char username[USER_MAX_LEN+1]; //display name
+    char message[SERVER_MAX_LEN+1];
 };
 
 #endif

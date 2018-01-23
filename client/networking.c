@@ -72,7 +72,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 	}
 	else {
 		outgoing->message_type = MT_MESSAGE;
-		strncpy(outgoing->chatroom, chatroom, sizeof(chatroom));
+		strncpy(outgoing->chatroom, chatroom, strlen(chatroom));
 	}
 	
 	strncpy(outgoing->username, username, strlen(username));

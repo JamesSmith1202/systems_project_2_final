@@ -111,7 +111,7 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 			if (read(read_network_fd, s, sizeof(s)) != -1) {
 				network_print(s, scroll, log_screen);
 			}
-			refreshCDKScreen(input_screen);
+			//refreshCDKScreen(input_screen);
 		}
 		refresh();
 	}
@@ -230,14 +230,20 @@ void network_process(int read_fd, int write_fd) {
 	char username[USER_MAX_LEN+1];
 	char chatroom[USER_MAX_LEN];
 	
-	sprintf(message, "please enter a username (max 32 characters)\n");
+	sprintf(message, "Please enter a username (max 32 characters)\n");
 	write(write_fd, message, strlen(message));
 	
 	read(read_fd, username, USER_MAX_LEN);
 	username[USER_MAX_LEN] = 0;
 	
+	//consume extra characters
+	read(read_fd, message, strlen(message));
+	
 	sprintf(message, "Username entered: %s\n", username);
 	write(write_fd, message, strlen(message));
+	
+	char *newline;
+	if ( (newline = strchr(username, '\n')) != 0) *newline = 0;
 	
 	/*
 		ADD GETTING CHATROOM STUFF
@@ -266,13 +272,12 @@ void network_process(int read_fd, int write_fd) {
 		
 		if (FD_ISSET(read_fd, &readfds)) {
 			if (read(read_fd, message, MSG_MAX_LEN) != -1) {
-				sprintf(message, "user read success\n");
-				/*
 				pack_message(&outgoing, message,
 					username, chatroom);
 				
 				bytes = send(my_fd, &outgoing, sizeof(outgoing), 0);
-				*/
+				
+				sprintf(message, "user read success\n");
 			}
 			else {
 				sprintf(message, "user read failed\n");

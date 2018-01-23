@@ -75,13 +75,25 @@ int main() {
 	*/
 	
 	struct server_message message;
-	strncpy(message.username, "Alice", strlen("Alice"));
-	strncpy(message.message, "How do you do?", strlen("How do you do?"));
+	strncpy(message.username, "1234567890123456789012345678901Q",
+		strlen("1234567890123456789012345678901Q"));
+	strncpy(message.message, "How do you do?\n", strlen("How do you do?\n"));
 	
 	int counter = 0;
 	
+	struct client_message in;
+	struct server_message out;
 	while(1) {
 		//err( send(in_fd, message, 32, 0) );
+		
+		if (recv(in_fd, &in, sizeof(in), MSG_DONTWAIT) != -1) {
+			printf("got user message\n");
+			out.message_type = in.message_type;
+			strncpy(out.username, in.username, strlen(in.username));
+			strncpy(out.message, in.message, strlen(in.message));
+			
+			err( send(in_fd, &out, sizeof(out), 0) );
+		}
 		
 		switch (counter) {
 			case 0:

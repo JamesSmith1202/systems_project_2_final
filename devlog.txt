@@ -73,3 +73,6 @@ fixed user chat display bug?
 linS -- 2018-01-22 16:45:50
 graphical enhancements
 
+linS -- 2018-01-23 17:14:17
+fixed some sizing and protocol issues
+
