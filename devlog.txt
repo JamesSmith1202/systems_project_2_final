@@ -82,3 +82,6 @@ changing up input handling
 linS -- 2018-01-24 14:39:16
 added note on chatroom handling
 
+linS -- 2018-01-24 15:41:51
+added some chatroom handling
+

@@ -78,6 +78,7 @@ int main() {
 	strncpy(message.username, "1234567890123456789012345678901Q",
 		strlen("1234567890123456789012345678901Q"));
 	strncpy(message.message, "How do you do?\n", strlen("How do you do?\n"));
+	message.in_chatroom = 1;
 	
 	int counter = 0;
 	
@@ -87,12 +88,26 @@ int main() {
 		//err( send(in_fd, message, 32, 0) );
 		
 		if (recv(in_fd, &in, sizeof(in), MSG_DONTWAIT) != -1) {
-			printf("got user message\n");
-			out.message_type = in.message_type;
-			strncpy(out.username, in.username, strlen(in.username));
-			strncpy(out.message, in.message, strlen(in.message));
-			
-			err( send(in_fd, &out, sizeof(out), 0) );
+			if (strlen(in.chatroom) < 1) {
+				printf("client not in chatroom\n");
+				out.message_type = MT_ERR;
+				strncpy(out.message, "not in room\n",
+					strlen("not in room\n"));
+				out.in_chatroom = 0;
+				
+				err( send(in_fd, &out, sizeof(out), 0) );
+			}
+			else {
+				printf("got user message\n");
+				out.message_type = in.message_type;
+				strncpy(out.username, in.username,
+					strlen(in.username));
+				out.in_chatroom = 1;
+				
+				strncpy(out.message, in.message, strlen(in.message));
+				
+				err( send(in_fd, &out, sizeof(out), 0) );
+			}
 		}
 		
 		switch (counter) {

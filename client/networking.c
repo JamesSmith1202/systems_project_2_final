@@ -70,6 +70,16 @@ void pack_message(struct client_message *outgoing, char *msg,
 			
 			strncpy(outgoing->chatroom, token, strlen(token)+1);
 		}
+		else if (!strcmp(copy, "join")) {
+			token = strsep(&temp, " ");
+			if (token == 0) {
+				outgoing->message_type = MT_ERR;
+				memset(&outgoing, 0, sizeof(outgoing));
+				return;
+			}
+			
+			strncpy(chatroom, token, strlen(token)+1);
+		}
 	}
 	else {
 		outgoing->message_type = MT_MESSAGE;
@@ -80,7 +90,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 	strncpy(outgoing->message, msg, strlen(msg)+1);
 }
 
-void unpack_message(struct server_message *incoming, char *msg) {
+void unpack_message(struct server_message *incoming, char *msg, short *in_room) {
 	char server[] = "[SERVER]";
 	char error[] = "[ERROR]";
 	char delim[] = ": ";
@@ -101,6 +111,8 @@ void unpack_message(struct server_message *incoming, char *msg) {
 	
 	strncat(msg, delim, strlen(delim));
 	strncat(msg, incoming->message, strlen(incoming->message));
+	
+	*in_room = incoming->in_chatroom;
 }
 
 

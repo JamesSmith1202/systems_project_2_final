@@ -87,11 +87,13 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 		if (FD_ISSET(read_cursor_fd, &input_set)) {
 			if (read(read_cursor_fd, &cursor_input,
 					sizeof(cursor_input)) != -1) {
+				/*
 				if (cursor_input == KEY_F(2)) {
 					break;
 				}
+				*/
 				
-				else if (cursor_input == '\n') {
+				if (cursor_input == '\n') {
 					while (cur_x > 1) {
 						move(cur_y, --cur_x);
 						addch(' ');
@@ -158,7 +160,7 @@ void input_process(int write_cursor_fd, int write_input_fd) {
 		
 		default:
 			if (index < max_x-2 && index < MSG_MAX_LEN) {
-				if (isprint(c)) str_buf[index++] = c;
+				/*if (isprint(c))*/ str_buf[index++] = c;
 				write(write_cursor_fd, &c, sizeof(char));
 			}
 		break;
@@ -176,6 +178,62 @@ void input_process(int write_cursor_fd, int write_input_fd) {
 	endwin();
 	*/
 }
+
+//my_fd is the socket
+//chatroom is the room the user is currently in
+//message is the message array from the network loop
+void message_loop(int read_fd, int write_fd, int my_fd,
+		char *message, char* username, char *chatroom) {
+	int bytes;
+	struct client_message outgoing;
+	struct server_message incoming;
+	short in_room;
+	
+	fd_set readfds;
+	
+	while(1) {
+		memset(&outgoing, 0, sizeof(outgoing));
+		memset(&incoming, 0, sizeof(incoming));
+		memset(message, 0, sizeof(message));
+		
+		FD_ZERO(&readfds);
+		FD_SET(read_fd, &readfds);
+		FD_SET(my_fd, &readfds);
+		
+		int max = (read_fd > my_fd) ? read_fd : my_fd;
+		
+		//wait for either socket read data or user input data
+		select(max + 1, &readfds, 0, 0, 0);
+		
+		if (FD_ISSET(read_fd, &readfds)) {
+			if (read(read_fd, message, MSG_MAX_LEN) != -1) {
+				pack_message(&outgoing, message,
+					username, chatroom);
+				
+				bytes = send(my_fd, &outgoing, sizeof(outgoing), 0);
+			}
+			else {
+				sprintf(message, "user read failed\n");
+				write(write_fd, message, strlen(message));
+			}
+		}
+		else if (FD_ISSET(my_fd, &readfds)) {
+			bytes = recv(my_fd, &incoming, sizeof(incoming), 0);
+			unpack_message(&incoming, message, &in_room);
+			
+			if (bytes == -1) {
+				sprintf(message, "Network read failed\n");
+			}
+			
+			write(write_fd, message, strlen(message));
+			
+			//client is no longer in a chatroom or !join failed
+			if (in_room == 0) memset(chatroom, 0, sizeof(chatroom));
+		}
+	}
+}
+
+
 
 /*
 ask user for ip/port to connect to
@@ -247,7 +305,6 @@ void network_process(int read_fd, int write_fd) {
 	
 	//username creation loop
 	char username[USER_MAX_LEN+1];
-	char chatroom[USER_MAX_LEN];
 	
 	sprintf(message, "Please enter a username (max 32 characters)\n");
 	write(write_fd, message, strlen(message));
@@ -256,7 +313,7 @@ void network_process(int read_fd, int write_fd) {
 	username[USER_MAX_LEN] = 0;
 	
 	//consume extra characters
-	read(read_fd, message, strlen(message));
+	//read(read_fd, message, strlen(message));
 	
 	sprintf(message, "Username entered: %s\n", username);
 	write(write_fd, message, strlen(message));
@@ -268,60 +325,11 @@ void network_process(int read_fd, int write_fd) {
 		SEND USERNAME TO SERVER
 	*/
 	
-	/*
-		ADD GETTING CHATROOM STUFF
-		(this is the part that should loop)
-	*/
+	char chatroom[USER_MAX_LEN];
+	memset(chatroom, 0, sizeof(chatroom));
+	strncpy(chatroom, "room boi", strlen("room boi"));
 	
-	int bytes;
-	struct client_message outgoing;
-	struct server_message incoming;
+	message_loop(read_fd, write_fd, my_fd, message, username, chatroom);
 	
-	fd_set readfds;
-	
-	//wait for user input data to come in
-	while( /*read(read_fd, message, sizeof(message)) != -1*/ 1) {
-		memset(&outgoing, 0, sizeof(outgoing));
-		memset(&incoming, 0, sizeof(incoming));
-		memset(message, 0, sizeof(message));
-		
-		FD_ZERO(&readfds);
-		FD_SET(read_fd, &readfds);
-		FD_SET(my_fd, &readfds);
-		
-		int max = (read_fd > my_fd) ? read_fd : my_fd;
-		
-		//wait for either socket read data or user input data
-		select(max + 1, &readfds, 0, 0, 0);
-		
-		if (FD_ISSET(read_fd, &readfds)) {
-			if (read(read_fd, message, MSG_MAX_LEN) != -1) {
-				pack_message(&outgoing, message,
-					username, chatroom);
-				
-				bytes = send(my_fd, &outgoing, sizeof(outgoing), 0);
-				
-				//sprintf(message, "user read success\n");
-			}
-			else {
-				sprintf(message, "user read failed\n");
-			}
-			write(write_fd, message, strlen(message));
-		}
-		else if (FD_ISSET(my_fd, &readfds)) {
-			bytes = recv(my_fd, &incoming, sizeof(incoming), 0);
-			unpack_message(&incoming, message);
-			
-			if (bytes == -1) {
-				sprintf(message, "Network read failed\n");
-			}
-			/*
-			else {
-				sprintf(message, "Network read success\n");
-			}
-			*/
-			write(write_fd, message, strlen(message));
-		}
-	}
 }
 

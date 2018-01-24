@@ -77,7 +77,7 @@ struct server_message{//received by client to display to user
     unsigned short message_type;//message vs return value of command
     char username[USER_MAX_LEN+1]; //display name
     char message[SERVER_MAX_LEN+1];
-    char in_chatroom;//should be 0 if not currently in chatroom, 1 if they are
+    short in_chatroom;//should be 0 if not currently in chatroom, 1 if they are
 };
 
 #endif
