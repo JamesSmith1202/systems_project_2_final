@@ -76,3 +76,6 @@ graphical enhancements
 linS -- 2018-01-23 17:14:17
 fixed some sizing and protocol issues
 
+linS -- 2018-01-24 14:29:36
+changing up input handling
+

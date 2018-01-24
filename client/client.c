@@ -23,6 +23,7 @@ int main() {
 		initscr();
 		noecho();
 		cbreak();
+		//keypad(stdscr, 1);
 		
 		is_parent = fork();
 		

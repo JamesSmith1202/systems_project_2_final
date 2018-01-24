@@ -61,8 +61,9 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 		0
 	);
 	
-	char s[MSG_MAX_LEN];
-	memset(s, 0, sizeof(s));
+	char network_input[SERVER_MAX_LEN*2];
+	int cursor_input;
+	//memset(s, 0, sizeof(s));
 	int cur_x, cur_y;
 	move(max_y-2, 1);
 	getyx(stdscr, cur_y, cur_x);
@@ -72,7 +73,8 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 	//create a set of fds
 	fd_set input_set;
 	while(1) {
-		memset(s, 0, sizeof(s));
+		memset(network_input, 0, sizeof(network_input));
+		cursor_input = 0;
 		
 		FD_ZERO(&input_set);
 		FD_SET(read_network_fd, &input_set);
@@ -83,16 +85,21 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 		select(max + 1, &input_set, 0, 0, 0);
 		
 		if (FD_ISSET(read_cursor_fd, &input_set)) {
-			if (read(read_cursor_fd, s, sizeof(s)) != -1) {
-				if (s[0] == '\n') {
+			if (read(read_cursor_fd, &cursor_input,
+					sizeof(cursor_input)) != -1) {
+				if (cursor_input == KEY_F(2)) {
+					break;
+				}
+				
+				else if (cursor_input == '\n') {
 					while (cur_x > 1) {
 						move(cur_y, --cur_x);
 						addch(' ');
 						move(cur_y, cur_x);
 					}
 				}
-				//else if (s[0] == KEY_BACKSPACE) {
-				else if (s[0] == 127) {
+				//else if (cursor_input == KEY_BACKSPACE) {
+				else if (cursor_input == 127) {
 					if (cur_x > 1) {
 						move(cur_y, --cur_x);
 					}
@@ -101,15 +108,16 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 					
 				}
 				
-				else if (s[0] != '\n') {
-					addch(s[0]);
+				else if (cursor_input != '\n') {
+					addch(cursor_input);
 					cur_x++;
 				}
 			}
 		}
 		else if (FD_ISSET(read_network_fd, &input_set)) {
-			if (read(read_network_fd, s, sizeof(s)) != -1) {
-				network_print(s, scroll, log_screen);
+			if (read(read_network_fd, network_input,
+					sizeof(network_input)) != -1) {
+				network_print(network_input, scroll, log_screen);
 			}
 			//refreshCDKScreen(input_screen);
 		}
@@ -129,7 +137,7 @@ void input_process(int write_cursor_fd, int write_input_fd) {
 	
 	getmaxyx(stdscr, max_y, max_x);
 	
-	while( (c = getch()) /*== some quit key*/ ) {
+	while( (c = getch()) /*!= KEY_F(2)*/ ) {
 		switch(c) {
 		case '\n':
 			str_buf[index++] = '\n';
@@ -150,12 +158,23 @@ void input_process(int write_cursor_fd, int write_input_fd) {
 		
 		default:
 			if (index < max_x-2 && index < MSG_MAX_LEN) {
-				str_buf[index++] = c;
+				if (isprint(c)) str_buf[index++] = c;
 				write(write_cursor_fd, &c, sizeof(char));
 			}
 		break;
 		}
 	}
+	
+	/*
+	write(write_cursor_fd, &c, sizeof(char));
+	
+	//write EOT (value 4) to network process
+	memset(str_buf, 0, sizeof(str_buf));
+	str_buf[0] = 4;
+	str_buf[1] = 0;
+	write(write_input_fd, str_buf, 2);
+	endwin();
+	*/
 }
 
 /*
@@ -246,7 +265,12 @@ void network_process(int read_fd, int write_fd) {
 	if ( (newline = strchr(username, '\n')) != 0) *newline = 0;
 	
 	/*
+		SEND USERNAME TO SERVER
+	*/
+	
+	/*
 		ADD GETTING CHATROOM STUFF
+		(this is the part that should loop)
 	*/
 	
 	int bytes;
@@ -277,7 +301,7 @@ void network_process(int read_fd, int write_fd) {
 				
 				bytes = send(my_fd, &outgoing, sizeof(outgoing), 0);
 				
-				sprintf(message, "user read success\n");
+				//sprintf(message, "user read success\n");
 			}
 			else {
 				sprintf(message, "user read failed\n");

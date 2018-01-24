@@ -49,7 +49,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 		temp = copy;
 		
 		token = strsep(&temp, " ");
-		printf("%s\n", token);
+		//printf("%s\n", token);
 		if (token == 0 || strlen(token) < 1) {
 			//printf("no arg\n");
 			
@@ -63,6 +63,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 			token = strsep(&temp, " ");
 			if (token == 0) {
 				//printf("no room\n");
+				outgoing->message_type = MT_ERR;
 				memset(&outgoing, 0, sizeof(outgoing));
 				return;
 			}
