@@ -49,10 +49,35 @@ struct chat_room{
     int num_users; //number of users currently connected
 };
 
+/*
+Note on the in_chatroom field:
+
+the client will not be in a chatroom initially
+
+client will request to join one through the !join command
+	if the in_chatroom field is == 0 in the response, the server did
+	not add the client to the chat room
+	
+	if it is 1, then client has successfully joined the room
+
+everytime the server sends a message to a client, the server should always
+	specify whether or not the client is still in the room.
+
+the client will assume it is no longer in a chat room if
+	in_chatroom == 0
+	
+	at this point, the client should attempt to join a chatroom again
+	with !join
+
+if the client uses the !leave command, it is expected that the server will
+	respond with in_chatroom == 0
+
+*/
 struct server_message{//received by client to display to user
     unsigned short message_type;//message vs return value of command
     char username[USER_MAX_LEN+1]; //display name
     char message[SERVER_MAX_LEN+1];
+    char in_chatroom;//should be 0 if not currently in chatroom, 1 if they are
 };
 
 #endif
