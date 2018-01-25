@@ -315,6 +315,13 @@ void network_process(int read_fd, int write_fd) {
 	//consume extra characters
 	//read(read_fd, message, strlen(message));
 	
+	int old_flags = fcntl(read_fd, F_GETFL, 0);
+	fcntl(read_fd, F_SETFL, old_flags | O_NONBLOCK);
+	
+	read(read_fd, message, strlen(message));
+	
+	fcntl(read_fd, F_SETFL, old_flags);
+	
 	sprintf(message, "Username entered: %s\n", username);
 	write(write_fd, message, strlen(message));
 	
