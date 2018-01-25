@@ -1,5 +1,6 @@
 client-objs = client.o processes.o networking.o
 client-libs = -l ncurses -l cdk
+server-objs = server.o array.o
 
 all:
 	make client server
@@ -18,7 +19,7 @@ client: $(client-objs)
 	gcc -o client_run $(client-objs) $(client-libs)
 
 server: server.o
-	gcc -o server_run server.o
+	gcc -o server_run $(server-objs)
 
 client.o: client/client.c client/processes.h
 	gcc -c client/client.c client/processes.h
@@ -29,8 +30,11 @@ processes.o: client/processes.c include/protocol.h client/processes.h client/net
 networking.o: client/networking.c client/networking.h include/protocol.h
 	gcc -c client/networking.c client/networking.h include/protocol.h
 
-server.o: server/server.c include/protocol.h
-	gcc -c server/server.c include/protocol.h
+server.o: server/server.c server/server.h include/protocol.h
+	gcc -c server/server.c include/protocol.h server/server.h
+
+array.o: server/array.c server/array.h include/protocol.h
+	gcc -c array.c array.h include/protocol.h
 
 clean:
 	rm -f *~

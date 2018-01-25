@@ -1,5 +1,6 @@
 #include "server.h"
 #include "../include/protocol.h"
+#include "array.h"
 
 int max_fd = 0;
 
@@ -22,23 +23,23 @@ void scan_accept(int listen_sock, struct sockaddr_storage *client_addr , socklen
   fd_set * set;
   FD_ZERO(set);
   FD_SET(listen_sock, set);//add the listening socket to the set
-  status = select(max_fd + 1, set, NULL, NULL, timeout);//check for client connections
+  status = select(max_fd + 1, set, NULL, NULL, &timeout);//check for client connections
   if(status == -1){
     perror("select");
     exit(1);
   }
   if(status > 0){//if there is a connection waiting...
     int i;
-    new_fd = accept(listenSocketfd, (struct sockaddr *)client_addr, client_addr_size); //accept new connection and save the socket fd for this connection
+    new_fd = accept(listen_sock, (struct sockaddr *)client_addr, client_addr_size); //accept new connection and save the socket fd for this connection
     if (new_fd == -1) //check for error
 	{
 	  perror("accept");
 	}
     else{
         is_max(new_fd);
-        FD_SET(new_fd, idle->users)//add the new connection to the idle room
+        FD_SET(new_fd, idle->users);//add the new connection to the idle room
         idle->num_users++;
-        inet_ntop(client_addr.ss_family, get_in_addr((struct sockaddr *)&client_addr), s, sizeof(s));//convert to human form
+        inet_ntop(client_addr->ss_family, get_in_addr((struct sockaddr *)&client_addr), s, sizeof(s));//convert to human form
         printf("Connection received from %s\n", s);
     }
   }
@@ -50,13 +51,13 @@ void scan_room(struct timeval timeout, struct chat_room * room, Array * chatroom
     int n;//number of bytes received
     struct client_message buff;//buffer for client messages 
     fd_set read_fds = *(room->users);//setting them equal to each other copies users into read_fds
-    if((select(max_fd+1, &read_fds, NULL, NULL, timeout)) == -1){
+    if((select(max_fd+1, &read_fds, NULL, NULL, &timeout)) == -1){
         perror("select");
         exit(1);
     }
     for(;i<=max_fd; i++){//iterate through all fds that the program has
         if(FD_ISSET(i, &read_fds)){//if i is part of this set...
-            if ((n = recv(i, buff, sizeof(buf), 0)) < 1) {//if error or closed connection...
+            if ((n = recv(i, &buff, sizeof(buff), 0)) < 1) {//if error or closed connection...
                 if (n == 0) {//closed connection
                     printf("socket %d disconnected\n", i);
                 } 
@@ -78,7 +79,7 @@ void scan_room(struct timeval timeout, struct chat_room * room, Array * chatroom
 void handle_message(int client_fd, struct client_message msg, struct chat_room * room, Array * chatrooms){
     struct server_message out;
     int i;
-    unsigned short type = MT_MESSAGE
+    unsigned short type = MT_MESSAGE;
     char * username;
     char * text = "";
     short in_chatroom = 1;
@@ -94,7 +95,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
         }
         else if(!strcmp(msg.message, "join")){
             struct chat_room * new_room = find_room(msg.chatroom, chatrooms);//search for the requested chat room
-            if(new_room == -1){//if the room wasnt found...make a new one
+            if((int)new_room == -1){//if the room wasnt found...make a new one
                 new_room = (struct chat_room *)(malloc(sizeof(struct chat_room)));//allocate memory for the chat room
                 strcpy(new_room->name, msg.chatroom);//make the requested name the name of the room
                 new_room->users = malloc(sizeof(fd_set));//allocate memory for new fd_set
@@ -116,7 +117,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
         else if(!strcmp(msg.message, "msg")){//msg sent to other chat rooms
             type = MT_MESSAGE;
             room = find_room(msg.chatroom, chatrooms);
-            if(room == -1){//if the room wasnt found
+            if((int)room == -1){//if the room wasnt found
                 type = MT_ERR;
                 text = "Error: Chatroom not found";
             }
@@ -159,7 +160,7 @@ int pack_msg(struct server_message * out, unsigned short type, char * username, 
     return 1;
 }
 
-struct chat_room find_room(char * target, Array * chatrooms){
+struct chat_room * find_room(char * target, Array * chatrooms){
     int i;
     for(i=0;i<chatrooms->len;i++){
         if(!strcmp(target, (chatrooms->array)[i])){

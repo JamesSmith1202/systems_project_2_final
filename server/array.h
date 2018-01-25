@@ -1,4 +1,7 @@
-#include <server.h>
+#ifndef ARRAY_H
+#define ARRAY_H
+
+#include "../include/protocol.h"
 
 typedef struct {
   struct chat_room *array;
@@ -9,3 +12,5 @@ typedef struct {
 void init_arr(Array *, size_t);
 void insert(Array *, struct chat_room);
 void free_arr(Array *);
+
+#endif
