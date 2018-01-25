@@ -2,6 +2,7 @@
 #define ARRAY_H
 
 #include "../include/protocol.h"
+#include <stdlib.h>
 
 typedef struct {
   struct chat_room *array;

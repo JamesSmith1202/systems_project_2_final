@@ -1,7 +1,7 @@
 #include "array.h"
 
 void init_arr(Array *a, size_t initialSize) {
-  a->array = (int *)malloc(initialSize * sizeof(struct chat_room));
+  a->array = (struct chat_room *)malloc(initialSize * sizeof(struct chat_room));
   a->len = 0;
   a->size = initialSize;
 }

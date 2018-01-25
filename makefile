@@ -18,7 +18,7 @@ client-debug:
 client: $(client-objs)
 	gcc -o client_run $(client-objs) $(client-libs)
 
-server: server.o
+server: $(server-objs)
 	gcc -o server_run $(server-objs)
 
 client.o: client/client.c client/processes.h
