@@ -45,7 +45,7 @@ void scan_accept(int listen_sock, struct sockaddr_storage *client_addr , socklen
 }
 
 //scans a room for input and handles their message
-void scan_room(struct timeval timeout, struct chat_room * room){
+void scan_room(struct timeval timeout, struct chat_room * room, Array * chatrooms){
     int i = 0;
     int n;//number of bytes received
     struct client_message buff;//buffer for client messages 
@@ -68,15 +68,97 @@ void scan_room(struct timeval timeout, struct chat_room * room){
                 room->num_users--;
             }
             else{//we have data
-                handle_message(i, buff, room);
+                handle_message(i, buff, room, chatrooms);
             }
         }
     }
 }
 
 //handles a client's message according to protocol
-void handle_message(int client_fd, struct client_message msg, struct chat_room * room){
+void handle_message(int client_fd, struct client_message msg, struct chat_room * room, Array * chatrooms){
+    struct server_message out;
+    int i;
+    unsigned short type = MT_MESSAGE
+    char * username;
+    char * text = "";
+    short in_chatroom = 1;
+    if(msg.message_type == MT_COMMAND){//if it is a command
+        type=MT_COMMAND;
+        username = "SERVER";
 
+        if(!strcmp(msg.message, "list")){
+          for(i=0;i<chatrooms->len;i++){//iterate through chat rooms
+              strcat(text, (chatrooms->array)[i].name);//concatenate the names of the chatrooms to the message
+              strcat(text, "\n");
+          }  
+        }
+        else if(!strcmp(msg.message, "join")){
+            struct chat_room * new_room = find_room(msg.chatroom, chatrooms);//search for the requested chat room
+            if(new_room == -1){//if the room wasnt found...make a new one
+                new_room = (struct chat_room *)(malloc(sizeof(struct chat_room)));//allocate memory for the chat room
+                strcpy(new_room->name, msg.chatroom);//make the requested name the name of the room
+                new_room->users = malloc(sizeof(fd_set));//allocate memory for new fd_set
+                insert(chatrooms, *new_room);//stick the new room in our list of chat rooms
+            }
+            FD_CLR(client_fd, room->users);//remove them from their current room
+            room->num_users--;
+            FD_SET(client_fd, new_room->users);//add them to the new room's fdset
+            new_room->num_users++;
+
+            sprintf(text, "You have joined %s. There are %d users currently in the room.\n", new_room->name, new_room->num_users);
+        }
+        else if(!strcmp(msg.message, "leave")){
+            FD_CLR(client_fd, room->users);//remove fd from fdset
+            room->num_users--;
+            sprintf(text, "You have left %s\n", room->name);
+            in_chatroom = 0;//send message stating that they arent in a chat room anymore
+        }
+        else if(!strcmp(msg.message, "msg")){//msg sent to other chat rooms
+            type = MT_MESSAGE;
+            room = find_room(msg.chatroom, chatrooms);
+            if(room == -1){//if the room wasnt found
+                type = MT_ERR;
+                text = "Error: Chatroom not found";
+            }
+        }
+        else if(!strcmp(msg.message, "history")){
+            /*
+            INSERT LOG CODE HERE
+            */
+        }
+        else if(!strcmp(msg.message, "help")){
+            text = "Commands the user can use:\n!list:			list chatrooms\n!join <room>:		join a chatroom\n!leave:			leave the current room\n!msg <room> <message>:	message the indicated room\n!history:		see a log of the messages in the current room\n!help:			lists all available commands\n";
+        }
+    }
+    else{//it is a message to be distributed to other clients
+        text = msg.message;//copy the user msg into the server message
+        username = msg.username
+    }
+    out = pack_msg(type, username, text, in_chatroom);
+    /*
+
+    DISTRIBUTE MESSAGES: SEND COMMANDS BACK TO SAME USER, SEND NORMAL MESSAGES/ MSG COMMAND TO ALL OTHER USERS IN THAT CHAT ROOM!
+
+    */
+}
+
+struct server_message pack_msg(unsigned short type, char * username, char * message, short in_chatroom){
+    struct server_message msg;
+    msg.message_type = type;
+    strcpy(msg.username, username);
+    strcpy(msg.message, message);
+    msg.in_chatroom = in_chatroom;
+    return msg;
+}
+
+struct chat_room find_room(char * target, Array * chatrooms){
+    int i;
+    for(i=0;i<chatrooms->len;i++){
+        if(!strcmp(target, (chatrooms->array)[i])){
+            return &(chatrooms->array)[i];
+        }
+    }
+    return -1;
 }
 
 void is_max(int i){
@@ -173,7 +255,7 @@ int main()
     while (true){ //infinite serving loop
       scan_select(listenSocketfd, &client_addr, &client_addr_size, timeout, &idle);//scan for new connections
       for(i=0;i<chatrooms.len;i++){//iterate through chatrooms
-          scan_room(timeout, chatrooms.array[i]);//handle each individual chatroom
+          scan_room(timeout, &chatrooms.array[i], &chatrooms);//handle each individual chatroom
       }
     }
     return 0;

@@ -1,7 +1,7 @@
 #include <server.h>
 
 typedef struct {
-  int *array;
+  struct chat_room *array;
   size_t len;
   size_t size;
 } Array;
