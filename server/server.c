@@ -1,6 +1,7 @@
 #include "server.h"
 #include "../include/protocol.h"
 #include "array.h"
+#include "log.h"
 
 int max_fd = 0;
 
@@ -94,7 +95,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
           for(i=0;i<chatrooms->len;i++){//iterate through chat rooms
               strcat(text, (chatrooms->array)[i].name);//concatenate the names of the chatrooms to the message
               strcat(text, "\n");
-          }  
+          }
         }
         else if(!strcmp(msg.message, "join")){
             struct chat_room * new_room = find_room(msg.chatroom, chatrooms);//search for the requested chat room
@@ -126,9 +127,12 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             }
         }
         else if(!strcmp(msg.message, "history")){
-            /*
-            INSERT LOG CODE HERE
-            */
+            char buffer[10000];
+            char date[10];
+            get_date(date, sizeof(date));
+            read_log(buffer, msg.chatroom, date);
+            text = buffer;
+            // print buffer
         }
         else if(!strcmp(msg.message, "help")){
             text = "Commands the user can use:\n!list:			list chatrooms\n!join <room>:		join a chatroom\n!leave:			leave the current room\n!msg <room> <message>:	message the indicated room\n!history:		see a log of the messages in the current room\n!help:			lists all available commands\n";
