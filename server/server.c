@@ -140,9 +140,12 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
     else{//it is a message to be distributed to other clients
         text = msg.message;//copy the user msg into the server message
         username = msg.username;
+        write_log(&msg);// write to log
+
     }
     pack_msg(&out, type, username, text, in_chatroom);
     print_server_message(out);
+    
     if(out.message_type == MT_COMMAND || out.message_type == MT_ERR){
         if (send(client_fd, &out, sizeof(struct server_message), 0) == -1) {
             perror("send");
