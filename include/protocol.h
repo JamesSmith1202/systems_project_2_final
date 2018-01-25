@@ -1,8 +1,6 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-#include<sys/select.h>
-
 //message type
 #define MT_COMMAND	0
 #define MT_MESSAGE	1
