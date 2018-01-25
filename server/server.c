@@ -20,7 +20,8 @@ void scan_accept(int listen_sock, struct sockaddr_storage *client_addr , socklen
   int new_fd;
   int status;
   char s[INET6_ADDRSTRLEN]; 
-  fd_set * set;
+  fd_set f;
+  fd_set * set = &f;
   FD_ZERO(set);
   FD_SET(listen_sock, set);//add the listening socket to the set
   status = select(max_fd + 1, set, NULL, NULL, &timeout);//check for client connections
@@ -29,6 +30,7 @@ void scan_accept(int listen_sock, struct sockaddr_storage *client_addr , socklen
     exit(1);
   }
   if(status > 0){//if there is a connection waiting...
+    printf("connection found\n");
     int i;
     new_fd = accept(listen_sock, (struct sockaddr *)client_addr, client_addr_size); //accept new connection and save the socket fd for this connection
     if (new_fd == -1) //check for error
@@ -83,6 +85,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
     char * username;
     char * text = "";
     short in_chatroom = 1;
+    print_client_message(msg);
     if(msg.message_type == MT_COMMAND){//if it is a command
         type=MT_COMMAND;
         username = "SERVER";
@@ -136,6 +139,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
         username = msg.username;
     }
     pack_msg(&out, type, username, text, in_chatroom);
+    print_server_message(out);
     if(out.message_type == MT_COMMAND || out.message_type == MT_ERR){
         if (send(client_fd, &out, sizeof(struct server_message), 0) == -1) {
             perror("send");
@@ -177,7 +181,7 @@ void is_max(int i){
 }
 
 void print_client_message(struct client_message msg){
-    printf("CLIENT MESSAGE:\n");
+    printf("\nCLIENT MESSAGE:\n");
     printf("message type: %d\n", msg.message_type);
     printf("chatroom: %s\n", msg.chatroom);
     printf("username: %s\n", msg.username);
@@ -186,17 +190,17 @@ void print_client_message(struct client_message msg){
 }
 
 void print_server_message(struct server_message msg){
-    printf("SERVER MESSAGE:\n");
+    printf("\nSERVER MESSAGE:\n");
     printf("message type: %d\n", msg.message_type);
     printf("username: %s\n", msg.username);
-    printf("message: %s\n", msg.message);
+    printf("message: %s", msg.message);//doesnt need \n because message already has one
     printf("in_chatroom: %d\n", msg.in_chatroom);
     printf("END OF CLIENT MESSAGE\n\n");
 }
 
 void print_chat_room(struct chat_room room){
     int i;
-    printf("CHAT ROOM:\n");
+    printf("\nCHAT ROOM:\n");
     printf("name: %s\n", room.name);
     printf("users: ");
     for(i=0;i<=max_fd; i++){

@@ -33,4 +33,10 @@ struct chat_room * find_room(char *, Array *);
 
 void is_max(int);
 
+void print_chat_room(struct chat_room);
+
+void print_server_message(struct server_message);
+
+void print_client_message(struct client_message);
+
 #endif
