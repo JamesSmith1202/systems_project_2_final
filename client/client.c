@@ -39,7 +39,9 @@ int main() {
 		}
 	}
 	else {
-		network_process(input[FD_READ], network[FD_WRITE]);
+		while(1) {
+			network_process(input[FD_READ], network[FD_WRITE]);
+		}
 	}
 	
 	return 0;

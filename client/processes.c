@@ -228,6 +228,11 @@ void message_loop(int read_fd, int write_fd, int my_fd,
 			if (bytes == -1) {
 				sprintf(message, "Network read failed\n");
 			}
+			else if (bytes == 0) {
+				sprintf(message, "Disconnected from server\n");
+				write(write_fd, message, strlen(message));
+				break;
+			}
 			
 			write(write_fd, message, strlen(message));
 			
@@ -336,9 +341,9 @@ void network_process(int read_fd, int write_fd) {
 	
 	char chatroom[USER_MAX_LEN];
 	memset(chatroom, 0, sizeof(chatroom));
-	strncpy(chatroom, "room boi", strlen("room boi"));
+	//strncpy(chatroom, "room boi", strlen("room boi"));
 	
 	message_loop(read_fd, write_fd, my_fd, message, username, chatroom);
-	
+	close(my_fd);
 }
 
