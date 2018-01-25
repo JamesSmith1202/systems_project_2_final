@@ -10,6 +10,18 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include "array.h"
 
 #define MYPORT "3490"   //Port to listen on
 #define BACKLOG 1000    //number of connections allowed on the incoming queue
+#define MIN_ROOMS 20
+
+void *get_in_addr(struct sockaddr *);
+
+void scan_accept(int, struct sockaddr_storage *, socklen_t *, struct timeval, struct chat_room *);
+
+void scan_room(struct timeval, struct chat_room *);
+
+void handle_message(int, struct client_message, struct chat_room *);
+
+void is_max(int);

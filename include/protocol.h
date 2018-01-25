@@ -18,9 +18,6 @@
 //max length for a chatroom's name
 #define CHATROOM_MAX_LEN 32
 
-//max number of users in one chat room
-#define MAX_USERS 16
-
 /*
 	commands the user can use (ideas):
 	!list:			list chatrooms
@@ -45,7 +42,7 @@ struct client_message{ //the message the client sends to server
 //a chat room on the server. We will have a list of these
 struct chat_room{
     char name[CHATROOM_MAX_LEN+1];//server name
-    int users[MAX_USERS];//list of client socket fd’s
+    fd_set * users;//list of client socket fd’s
     int num_users; //number of users currently connected
 };
 

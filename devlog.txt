@@ -85,3 +85,6 @@ added note on chatroom handling
 linS -- 2018-01-24 15:41:51
 added some chatroom handling
 
+smithJ -- 2018-01-25 02:14:15
+wrote resizeable array for chatrooms, connection handling, and I am halfway through message handling
+
