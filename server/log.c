@@ -53,8 +53,6 @@ void read_log(char *buffer, char *chatroom, char *date) {
 
     int fd = open(path, O_RDONLY, 0600);
     read(fd, buffer, sizeof(buffer));
-
-    printf("%s\n", buffer);
 }
 
 int main() {
