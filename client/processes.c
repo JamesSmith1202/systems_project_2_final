@@ -1,4 +1,4 @@
-#include<cdk/cdk.h>
+#include<cdk.h>
 
 #include"../include/protocol.h"
 #include"networking.h"

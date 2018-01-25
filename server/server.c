@@ -180,6 +180,38 @@ void is_max(int i){
     }
 }
 
+void print_client_message(struct client_message msg){
+    printf("CLIENT MESSAGE:\n");
+    printf("message type: %d\n", msg.message_type);
+    printf("chatroom: %s\n", msg.chatroom);
+    printf("username: %s\n", msg.username);
+    printf("message: %s\n", msg.message);
+    printf("END OF CLIENT MESSAGE\n\n");
+}
+
+void print_server_message(struct server_message msg){
+    printf("SERVER MESSAGE:\n");
+    printf("message type: %d\n", msg.message_type);
+    printf("username: %s\n", msg.username);
+    printf("message: %s\n", msg.message);
+    printf("in_chatroom: %d\n", msg.in_chatroom);
+    printf("END OF CLIENT MESSAGE\n\n");
+}
+
+void print_chat_room(struct chat_room room){
+    int i;
+    printf("CHAT ROOM:\n");
+    printf("name: %s\n", room.name);
+    printf("users: ");
+    for(i=0;i<=max_fd; i++){
+        if(FD_ISSET(i, room.users)){
+            printf("%d ", i);
+        }
+    }
+    printf("\nnum_users: %d\n", room.num_users);
+    printf("END OF CHAT ROOM\n\n");
+}
+
 int main()
 {
     printf("Starting server setup...\n");
@@ -253,22 +285,24 @@ int main()
     struct timeval timeout;//set timeout vals to 0 so it polls instead of waiting in select for connections
     timeout.tv_sec = 0;
     timeout.tv_usec = 0;
-
-    max_fd = listenSocketfd;//need to keep track of largest fd for select
+    
+    is_max(listenSocketfd);//need to keep track of largest fd for select
 
     Array chatrooms;//Array is typedef
     init_arr(&chatrooms, MIN_ROOMS);//initialize the chatrooms resizable array
-
+    
     struct chat_room idle;//a room where new connections/fds with no chat room go. just listens for commands.
     strcpy(idle.name,"IDLE");
     idle.num_users = 0;
+    fd_set idle_set;
+    idle.users = &idle_set;
     insert(&chatrooms, idle);//idle will be at the 0 index
-
+    
     int i;
     while (1){ //infinite serving loop
       scan_accept(listenSocketfd, &client_addr, &client_addr_size, timeout, &idle);//scan for new connections
       for(i=0;i<chatrooms.len;i++){//iterate through chatrooms
-          scan_room(timeout, &chatrooms.array[i], &chatrooms);//handle each individual chatroom
+        scan_room(timeout, &chatrooms.array[i], &chatrooms);//handle each individual chatroom
       }
     }
     return 0;
