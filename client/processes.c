@@ -1,4 +1,8 @@
-#include<cdk.h>
+#ifdef __linux__
+	#include<cdk/cdk.h>
+#elif __APPLE__
+	#include<cdk.h>
+#endif
 
 #include"../include/protocol.h"
 #include"networking.h"

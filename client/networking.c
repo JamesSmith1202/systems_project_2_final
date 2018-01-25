@@ -45,7 +45,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 		char copy[MSG_MAX_LEN];
 		
 		//strip the '!'
-		memmove(copy, msg+1, strlen(msg) - 1);
+		memmove(copy, msg+1, strlen(msg));
 		temp = copy;
 		
 		token = strsep(&temp, " ");

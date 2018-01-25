@@ -81,7 +81,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 		char copy[MSG_MAX_LEN];
 		
 		//strip the '!'
-		memmove(copy, msg+1, strlen(msg) - 1);
+		memmove(copy, msg+1, strlen(msg));
 		temp = copy;
 		
 		token = strsep(&temp, " ");
@@ -107,6 +107,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 			strncpy(outgoing->chatroom, token, strlen(token)+1);
 		}
 		else if (!strcmp(copy, "join")) {
+			printf("%s\n", temp);
 			token = strsep(&temp, " ");
 			if (token == 0) {
 				outgoing->message_type = MT_ERR;
@@ -114,7 +115,13 @@ void pack_message(struct client_message *outgoing, char *msg,
 				return;
 			}
 			
+			printf("%s\n", token);
+			printf("%p\n", &temp);
+			
 			memset(chatroom, 0, sizeof(chatroom));
+			//strncpy(chatroom, temp, strlen(temp));
+			//strncpy(outgoing->chatroom, temp, strlen(temp));
+			
 			strncpy(chatroom, token, strlen(token));
 			strncpy(outgoing->chatroom, token, strlen(token));
 			
@@ -136,7 +143,7 @@ int main(void) {
     char user[USER_MAX_LEN];
     char chat[CHATROOM_MAX_LEN];
     
-    char msg[] = "um";
+    char msg[] = "!join Ally";
     
     strncpy(user, "Bob", 4);
     strncpy(chat, "room", 5);
