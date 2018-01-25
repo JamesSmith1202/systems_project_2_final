@@ -97,3 +97,6 @@ finished message distribution. time to debug
 linS -- 2018-01-25 15:24:18
 fixing chatroom packaging
 
+siuR -- 2018-01-25 16:40:13
+Implement history on server
+
