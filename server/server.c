@@ -134,21 +134,29 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
         text = msg.message;//copy the user msg into the server message
         username = msg.username
     }
-    out = pack_msg(type, username, text, in_chatroom);
-    /*
-
-    DISTRIBUTE MESSAGES: SEND COMMANDS BACK TO SAME USER, SEND NORMAL MESSAGES/ MSG COMMAND TO ALL OTHER USERS IN THAT CHAT ROOM!
-
-    */
+    pack_msg(&out, type, username, text, in_chatroom);
+    if(out.message_type == MT_COMMAND || out.message_type == MT_ERR){
+        if (send(client_fd, out, sizeof(struct server_message), 0) == -1) {
+            perror("send");
+        }
+    }
+    else{//send to the whole gang
+        for(i=0; i <=max_fd; i++){
+            if(FD_ISSET(i, room->users)){//if i is in the room
+                if (send(i, out, sizeof(struct server_message), 0) == -1) {
+                    perror("send");
+                }
+            }
+        }
+    }
 }
 
-struct server_message pack_msg(unsigned short type, char * username, char * message, short in_chatroom){
-    struct server_message msg;
-    msg.message_type = type;
-    strcpy(msg.username, username);
-    strcpy(msg.message, message);
-    msg.in_chatroom = in_chatroom;
-    return msg;
+int pack_msg(struct server_message * out, unsigned short type, char * username, char * message, short in_chatroom){
+    out->message_type = type;
+    strcpy(out->username, username);
+    strcpy(out->message, message);
+    out->in_chatroom = in_chatroom;
+    return 1;
 }
 
 struct chat_room find_room(char * target, Array * chatrooms){

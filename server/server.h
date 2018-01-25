@@ -18,10 +18,14 @@
 
 void *get_in_addr(struct sockaddr *);
 
-void scan_accept(int, struct sockaddr_storage *, socklen_t *, struct timeval, struct chat_room *);
+void scan_accept(int, struct sockaddr_storage *, socklen_t *, struct timeval, struct chat_room *, Array *);
 
 void scan_room(struct timeval, struct chat_room *);
 
-void handle_message(int, struct client_message, struct chat_room *);
+void handle_message(int, struct client_message, struct chat_room *, Array *);
+
+int pack_msg(struct server_message *, unsigned short, char *, char *, short)
+
+struct chat_room find_room(char *, Array *)
 
 void is_max(int);
