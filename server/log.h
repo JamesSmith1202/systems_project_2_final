@@ -6,6 +6,7 @@
 
 #define LOG_DATE_FORMAT "%G%m%d"
 #define LOG_FORMAT "[%s] %s: %s\n"
+#define LOG_BASEDIR "data"
 
 void get_timestamp(char* buffer, size_t bufferLen);
 void get_date(char* buffer, size_t bufferLen);

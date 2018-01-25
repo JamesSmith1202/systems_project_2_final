@@ -1,6 +1,6 @@
 client-objs = client.o processes.o networking.o
 client-libs = -l ncurses -l cdk
-server-objs = server.o array.o
+server-objs = server.o array.o log.o
 
 all:
 	make client server
@@ -35,6 +35,9 @@ server.o: server/server.c server/server.h include/protocol.h
 
 array.o: server/array.c server/array.h include/protocol.h
 	gcc -c server/array.c server/array.h include/protocol.h
+
+log.o: server/log.c server/log.h include/protocol.h
+	gcc -c server/log.c server/log.h include/protocol.h
 
 clean:
 	rm -f *~

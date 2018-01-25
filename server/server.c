@@ -127,12 +127,11 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             }
         }
         else if(!strcmp(msg.message, "history")){
-            char buffer[10000];
+            char buffer[SERVER_MAX_LEN + 1];
             char date[10];
             get_date(date, sizeof(date));
             read_log(buffer, msg.chatroom, date);
             text = buffer;
-            // print buffer
         }
         else if(!strcmp(msg.message, "help")){
             text = "Commands the user can use:\n!list:			list chatrooms\n!join <room>:		join a chatroom\n!leave:			leave the current room\n!msg <room> <message>:	message the indicated room\n!history:		see a log of the messages in the current room\n!help:			lists all available commands\n";
@@ -141,9 +140,12 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
     else{//it is a message to be distributed to other clients
         text = msg.message;//copy the user msg into the server message
         username = msg.username;
+        write_log(&msg);// write to log
+
     }
     pack_msg(&out, type, username, text, in_chatroom);
     print_server_message(out);
+    
     if(out.message_type == MT_COMMAND || out.message_type == MT_ERR){
         if (send(client_fd, &out, sizeof(struct server_message), 0) == -1) {
             perror("send");
