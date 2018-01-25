@@ -78,7 +78,12 @@ void pack_message(struct client_message *outgoing, char *msg,
 				return;
 			}
 			
-			strncpy(chatroom, token, strlen(token)+1);
+			memset(chatroom, 0, sizeof(chatroom));
+			strncpy(chatroom, token, strlen(token));
+			strncpy(outgoing->chatroom, token, strlen(token));
+			
+			chatroom[strlen(token)] = 0;
+			outgoing->chatroom[strlen(token)] = 0;
 		}
 	}
 	else {

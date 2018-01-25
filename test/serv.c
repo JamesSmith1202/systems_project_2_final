@@ -85,9 +85,12 @@ int main() {
 	struct client_message in;
 	struct server_message out;
 	while(1) {
+		memset(&out, 0, sizeof(out));
+		memset(&in, 0, sizeof(in));
 		//err( send(in_fd, message, 32, 0) );
 		
 		if (recv(in_fd, &in, sizeof(in), MSG_DONTWAIT) != -1) {
+			/*
 			if (strlen(in.chatroom) < 1) {
 				printf("client not in chatroom\n");
 				out.message_type = MT_ERR;
@@ -97,7 +100,7 @@ int main() {
 				
 				err( send(in_fd, &out, sizeof(out), 0) );
 			}
-			else {
+			else {*/
 				printf("got user message\n");
 				out.message_type = in.message_type;
 				strncpy(out.username, in.username,
@@ -107,7 +110,10 @@ int main() {
 				strncpy(out.message, in.message, strlen(in.message));
 				
 				err( send(in_fd, &out, sizeof(out), 0) );
-			}
+				//printf("%s\n", in.chatroom);
+				//printf("%s\n", in.username);
+				printf("%lu\n", strlen(in.chatroom));
+			//}
 		}
 		
 		switch (counter) {

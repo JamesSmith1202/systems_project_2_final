@@ -74,7 +74,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 	if (strlen(msg) < 1) return;
 	
 	if (msg[0] == '!') {
-		printf("found !\n");
+		//printf("found !\n");
 		outgoing->message_type = MT_COMMAND;
 		
 		char *token, *temp;
@@ -85,9 +85,9 @@ void pack_message(struct client_message *outgoing, char *msg,
 		temp = copy;
 		
 		token = strsep(&temp, " ");
-		printf("%s\n", token);
+		//printf("%s\n", token);
 		if (token == 0 || strlen(token) < 1) {
-			printf("no arg\n");
+			//printf("no arg\n");
 			
 			outgoing->message_type = MT_ERR;
 			
@@ -98,17 +98,33 @@ void pack_message(struct client_message *outgoing, char *msg,
 			//get the target chatroom name
 			token = strsep(&temp, " ");
 			if (token == 0) {
-				printf("no room\n");
+				//printf("no room\n");
+				outgoing->message_type = MT_ERR;
 				memset(&outgoing, 0, sizeof(outgoing));
 				return;
 			}
 			
 			strncpy(outgoing->chatroom, token, strlen(token)+1);
 		}
+		else if (!strcmp(copy, "join")) {
+			token = strsep(&temp, " ");
+			if (token == 0) {
+				outgoing->message_type = MT_ERR;
+				memset(&outgoing, 0, sizeof(outgoing));
+				return;
+			}
+			
+			memset(chatroom, 0, sizeof(chatroom));
+			strncpy(chatroom, token, strlen(token));
+			strncpy(outgoing->chatroom, token, strlen(token));
+			
+			chatroom[strlen(token)] = 0;
+			outgoing->chatroom[strlen(token)] = 0;
+		}
 	}
 	else {
 		outgoing->message_type = MT_MESSAGE;
-		strncpy(outgoing->chatroom, chatroom, sizeof(chatroom));
+		strncpy(outgoing->chatroom, chatroom, strlen(chatroom));
 	}
 	
 	strncpy(outgoing->username, username, strlen(username));
@@ -117,17 +133,19 @@ void pack_message(struct client_message *outgoing, char *msg,
 
 int main(void) {
     struct client_message out;
-    char msg[MSG_MAX_LEN];
     char user[USER_MAX_LEN];
     char chat[CHATROOM_MAX_LEN];
     
-    strncpy(msg, "!msg rose hello", 100);
+    char msg[] = "um";
+    
     strncpy(user, "Bob", 4);
     strncpy(chat, "room", 5);
     
     pack_message(&out, msg, user, chat);
     
     printf("%d: %s, %s, %s\n", out.message_type, out.chatroom, out.username, out.message);
+    
+    printf("%d: %lu, %lu, %lu\n", out.message_type, strlen(out.chatroom), strlen(out.username), strlen(out.message));
     
 	return 0;
 }

@@ -313,12 +313,10 @@ void network_process(int read_fd, int write_fd) {
 	username[USER_MAX_LEN] = 0;
 	
 	//consume extra characters
-	//read(read_fd, message, strlen(message));
-	
 	int old_flags = fcntl(read_fd, F_GETFL, 0);
 	fcntl(read_fd, F_SETFL, old_flags | O_NONBLOCK);
 	
-	read(read_fd, message, strlen(message));
+	read(read_fd, message, sizeof(message));
 	
 	fcntl(read_fd, F_SETFL, old_flags);
 	

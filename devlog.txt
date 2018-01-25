@@ -94,3 +94,6 @@ almost finished message handling
 smithJ -- 2018-01-25 13:01:24
 finished message distribution. time to debug
 
+linS -- 2018-01-25 15:24:18
+fixing chatroom packaging
+
