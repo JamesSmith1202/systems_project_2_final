@@ -88,3 +88,6 @@ added some chatroom handling
 smithJ -- 2018-01-25 02:14:15
 wrote resizeable array for chatrooms, connection handling, and I am halfway through message handling
 
+smithJ -- 2018-01-25 05:00:05
+almost finished message handling
+
