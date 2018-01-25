@@ -133,18 +133,18 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
     }
     else{//it is a message to be distributed to other clients
         text = msg.message;//copy the user msg into the server message
-        username = msg.username
+        username = msg.username;
     }
     pack_msg(&out, type, username, text, in_chatroom);
     if(out.message_type == MT_COMMAND || out.message_type == MT_ERR){
-        if (send(client_fd, out, sizeof(struct server_message), 0) == -1) {
+        if (send(client_fd, &out, sizeof(struct server_message), 0) == -1) {
             perror("send");
         }
     }
     else{//send to the whole gang
         for(i=0; i <=max_fd; i++){
             if(FD_ISSET(i, room->users)){//if i is in the room
-                if (send(i, out, sizeof(struct server_message), 0) == -1) {
+                if (send(i, &out, sizeof(struct server_message), 0) == -1) {
                     perror("send");
                 }
             }
@@ -163,11 +163,11 @@ int pack_msg(struct server_message * out, unsigned short type, char * username, 
 struct chat_room * find_room(char * target, Array * chatrooms){
     int i;
     for(i=0;i<chatrooms->len;i++){
-        if(!strcmp(target, (chatrooms->array)[i])){
+        if(!strcmp(target, ((chatrooms->array)[i]).name)){
             return &(chatrooms->array)[i];
         }
     }
-    return -1;
+    return (struct chat_room *)-1;
 }
 
 void is_max(int i){
@@ -256,13 +256,13 @@ int main()
     init_arr(&chatrooms, MIN_ROOMS);//initialize the chatrooms resizable array
 
     struct chat_room idle;//a room where new connections/fds with no chat room go. just listens for commands.
-    idle.name = "IDLE";
+    strcpy(idle.name,"IDLE");
     idle.num_users = 0;
     insert(&chatrooms, idle);//idle will be at the 0 index
 
     int i;
-    while (true){ //infinite serving loop
-      scan_select(listenSocketfd, &client_addr, &client_addr_size, timeout, &idle);//scan for new connections
+    while (1){ //infinite serving loop
+      scan_accept(listenSocketfd, &client_addr, &client_addr_size, timeout, &idle);//scan for new connections
       for(i=0;i<chatrooms.len;i++){//iterate through chatrooms
           scan_room(timeout, &chatrooms.array[i], &chatrooms);//handle each individual chatroom
       }

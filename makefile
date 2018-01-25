@@ -34,7 +34,7 @@ server.o: server/server.c server/server.h include/protocol.h
 	gcc -c server/server.c include/protocol.h server/server.h
 
 array.o: server/array.c server/array.h include/protocol.h
-	gcc -c array.c array.h include/protocol.h
+	gcc -c server/array.c server/array.h include/protocol.h
 
 clean:
 	rm -f *~
