@@ -139,3 +139,6 @@ client will ignore messages with 0 length
 linS -- 2018-01-26 03:05:55
 fixed client not dcing from server
 
+smithJ -- 2018-01-26 03:25:40
+hours of debugging. added server fixes. cleaned up memory usage. notify users when someone enters and leaves chat room. restrict more usage of secret IDLE room
+
