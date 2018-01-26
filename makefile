@@ -37,6 +37,7 @@ log.o: server/log.c server/log.h include/protocol.h
 clean:
 	rm -f *~
 	rm -f *.o
+	rm -rf data
 	rm -f client_run server_run client_debug test-client test-serv
 
 build-test:
