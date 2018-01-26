@@ -47,7 +47,7 @@ void scan_accept(int listen_sock, struct sockaddr_storage *client_addr , socklen
         struct server_message out;
         pack_msg(&out, MT_MESSAGE, "SERVER", "Welcome to the server! Use !help to see commands\n", 0);
         if (send(new_fd, &out, sizeof(struct server_message), 0) == -1) {
-            perror("send");
+            perror("send3");
         }
     }
   }
@@ -115,6 +115,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
                 new_room = (struct chat_room *)(malloc(sizeof(struct chat_room)));//allocate memory for the chat room
                 strcpy(new_room->name, msg.chatroom);//make the requested name the name of the room
                 new_room->users = malloc(sizeof(fd_set));//allocate memory for new fd_set
+                FD_ZERO(new_room->users);
                 new_room->num_users = 0;
                 insert(chatrooms, *new_room);//stick the new room in our list of chat rooms
             }
@@ -190,14 +191,14 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
     
     if(out.message_type == MT_COMMAND || out.message_type == MT_ERR){
         if (send(client_fd, &out, sizeof(struct server_message), 0) == -1) {
-            perror("send");
+            perror("send1");
         }
     }
     else{//send to the chat room
         for(i=0; i <=max_fd; i++){
             if(FD_ISSET(i, room->users)){//if i is in the room
                 if (send(i, &out, sizeof(struct server_message), 0) == -1) {
-                    perror("send");
+                    perror("send2");
                 }
             }
         }
