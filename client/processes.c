@@ -200,7 +200,7 @@ void message_loop(int read_fd, int write_fd, int my_fd,
 	while(1) {
 		memset(&outgoing, 0, sizeof(outgoing));
 		memset(&incoming, 0, sizeof(incoming));
-		memset(message, 0, sizeof(message));
+		memset(message, 0, SERVER_MAX_LEN*2);
 		
 		FD_ZERO(&readfds);
 		FD_SET(read_fd, &readfds);
@@ -244,7 +244,7 @@ void message_loop(int read_fd, int write_fd, int my_fd,
 				write(write_fd, message, strlen(message));
 				
 				//client is no longer in a chatroom or !join failed
-				if (in_room == 0) memset(chatroom, 0, sizeof(chatroom));
+				if (in_room == 0) memset(chatroom, 0, CHATROOM_MAX_LEN+1);
 			}
 		}
 	}

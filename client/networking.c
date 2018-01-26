@@ -127,7 +127,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 			}
 			
 			//strncpy(outgoing->chatroom, token, strlen(token)+1);
-			memset(chatroom, 0, sizeof(chatroom));
+			memset(chatroom, 0, CHATROOM_MAX_LEN+1);
 			strncpy(chatroom, token, strlen(token));
 			chatroom[CHATROOM_MAX_LEN] = 0;
 			strncpy(outgoing->chatroom, chatroom, strlen(chatroom)+1);
@@ -140,7 +140,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 				return;
 			}
 			
-			memset(chatroom, 0, sizeof(chatroom));
+			memset(chatroom, 0, CHATROOM_MAX_LEN+1);
 			strncpy(chatroom, token, strlen(token));
 			chatroom[CHATROOM_MAX_LEN] = 0;
 			strncpy(outgoing->chatroom, chatroom, strlen(chatroom)+1);
