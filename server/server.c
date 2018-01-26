@@ -145,6 +145,10 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             command += strlen(command)+1;//get to the rest of the message that has <room> and message
             strsep(&command, " ");//shift to the message
             strcpy(text, command);
+
+            strcpy(msg.message, text);
+            write_log(&msg);// write to log
+            
             if((int)room == -1){//if the room wasnt found
                 type = MT_ERR;
                 strcpy(text,"ERROR: Chatroom not found");
