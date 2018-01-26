@@ -127,3 +127,6 @@ Add error handling for history
 linS -- 2018-01-25 23:48:29
 added bounds to chatroom length
 
+linS -- 2018-01-26 00:40:48
+fixed username issue?
+

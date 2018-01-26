@@ -33,6 +33,7 @@ int valid_connection(int write_fd, struct addrinfo hint, struct addrinfo **data,
 	return 1;
 }
 
+/*
 void pack_message(struct client_message *outgoing, char *msg,
 		char *username, char *chatroom, short *disconnect) {
 	if (strlen(msg) < 1) return;
@@ -92,6 +93,67 @@ void pack_message(struct client_message *outgoing, char *msg,
 	strncpy(outgoing->username, username, strlen(username));
 	strncpy(outgoing->message, msg, strlen(msg));
 }
+*/
+
+void pack_message(struct client_message *outgoing, char *msg,
+		char *username, char *chatroom, short *disconnect) {
+	if (strlen(msg) < 1) return;
+	
+	if (msg[0] == '!') {
+		outgoing->message_type = MT_COMMAND;
+		
+		char *token, *temp;
+		char copy[MSG_MAX_LEN];
+		
+		//strip the '!'
+		memmove(copy, msg+1, strlen(msg));
+		temp = copy;
+		
+		token = strsep(&temp, " ");
+		if (token == 0 || strlen(token) < 1) {
+			
+			outgoing->message_type = MT_ERR;
+			
+			return;
+		}
+		
+		if (!strcmp(copy, "msg")) {
+			//get the target chatroom name
+			token = strsep(&temp, " ");
+			if (token == 0) {
+				outgoing->message_type = MT_ERR;
+				memset(&outgoing, 0, sizeof(outgoing));
+				return;
+			}
+			
+			strncpy(outgoing->chatroom, token, strlen(token)+1);
+		}
+		else if (!strcmp(copy, "join")) {
+			token = strsep(&temp, " ");
+			if (token == 0) {
+				outgoing->message_type = MT_ERR;
+				memset(&outgoing, 0, sizeof(outgoing));
+				return;
+			}
+			
+			memset(chatroom, 0, sizeof(chatroom));
+			strncpy(chatroom, token, strlen(token));
+			chatroom[CHATROOM_MAX_LEN] = 0;
+			strncpy(outgoing->chatroom, chatroom, strlen(chatroom)+1);
+		}
+		else if (!strcmp(copy, "disconnect")) {
+			*disconnect = 1;
+			return;
+		}
+	}
+	else {
+		outgoing->message_type = MT_MESSAGE;
+		strncpy(outgoing->chatroom, chatroom, strlen(chatroom)+1);
+	}
+	
+	strncpy(outgoing->username, username, strlen(username)+1);
+	strncpy(outgoing->message, msg, strlen(msg)+1);
+}
 
 void unpack_message(struct server_message *incoming, char *msg, short *in_room) {
 	char server[] = "[SERVER]";
@@ -114,6 +176,7 @@ void unpack_message(struct server_message *incoming, char *msg, short *in_room) 
 	
 	strncat(msg, delim, strlen(delim));
 	strncat(msg, incoming->message, strlen(incoming->message)+1);
+	strncat(msg, "\n", strlen("\n"));
 	
 	*in_room = incoming->in_chatroom;
 }

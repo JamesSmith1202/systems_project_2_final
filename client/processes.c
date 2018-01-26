@@ -345,7 +345,7 @@ void network_process(int read_fd, int write_fd) {
 	char *newline;
 	if ( (newline = strchr(username, '\n')) != 0) *newline = 0;
 	
-	char chatroom[USER_MAX_LEN];
+	char chatroom[CHATROOM_MAX_LEN+1];
 	memset(chatroom, 0, sizeof(chatroom));
 	
 	message_loop(read_fd, write_fd, my_fd, message, username, chatroom);

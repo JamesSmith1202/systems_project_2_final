@@ -4,12 +4,6 @@ server-objs = server.o array.o log.o
 
 all: client server
 
-client-debug:
-	gcc -g -c client/client.c client/processes.h
-	gcc -g -c client/processes.c include/protocol.h client/processes.h client/networking.h
-	gcc -g -c client/networking.c client/networking.h include/protocol.h
-	gcc -o client_debug $(client-objs) $(client-libs)
-
 client: $(client-objs)
 	gcc -o client_run $(client-objs) $(client-libs)
 
@@ -40,7 +34,13 @@ clean:
 	rm -rf data
 	rm -f client_run server_run client_debug test-client test-serv
 
+client-debug:
+	gcc -g -c client/client.c client/processes.h
+	gcc -g -c client/processes.c include/protocol.h client/processes.h client/networking.h
+	gcc -g -c client/networking.c client/networking.h include/protocol.h
+	gcc -o client_debug $(client-objs) $(client-libs)
+
 build-test:
-	gcc -o test-client test/client_test.c
+	gcc -g -o test-client test/client_test.c
 	gcc -o test-serv test/serv.c
 
