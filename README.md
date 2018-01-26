@@ -6,7 +6,7 @@
 A multiplexing TCP socket chat server that can sustain many chat rooms and users and its corresponding client.
 
 ### Dependencies
-You will need to install the following libraries through apt-get:
+You will need to install the following libraries through `apt-get`:
 
 * `libncurses5-dev`
 * `libncursesw5-dev`
@@ -44,6 +44,7 @@ commands the user can use:
 * It is recommended to use a fullscreen terminal window for the client. The client doesn't support resizing windows.
 * The open endedness of the client ip/port selection allows for the possibility of connecting to different servers(given that you run the servers on different IPs or ports, but they are hardcoded currently)
 * Fixed size buffers restrict size of data transfer
+* The maximum input and output length is the width of the terminal window (text-wrapping isn't supported)
 
 ##### Notes on the server 
 * The server does not support unique usernames
