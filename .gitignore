@@ -4,6 +4,7 @@
 client_run
 server_run
 test-*
+data/
 
 # Prerequisites
 *.d
