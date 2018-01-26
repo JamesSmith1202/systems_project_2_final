@@ -269,6 +269,9 @@ void network_process(int read_fd, int write_fd) {
 	char port[MSG_MAX_LEN];
 	int my_fd, status;
 	
+	sprintf(message, "Press ^C to quit\n");
+	write(write_fd, message, strlen(message));
+	
 	//initial connection loop
 	do {
 		do {
