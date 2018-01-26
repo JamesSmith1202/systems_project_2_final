@@ -38,7 +38,7 @@ commands the user can use:
 ```
 * To chat, the user can just enter lines similar to being in a terminal session(type and press enter)
 
-##### Notes on the client
+#### Notes on the client
 * The client can support the BACKSPACE key, but no other special function keys (like DELETE or any arrow keys).
 * TAB is supported, but the input display may become messed up.
 * It is recommended to use a fullscreen terminal window for the client. The client doesn't support resizing windows.
@@ -46,6 +46,14 @@ commands the user can use:
 * Fixed size buffers restrict size of data transfer
 * The maximum input and output length is the width of the terminal window (text-wrapping isn't supported)
 
-##### Notes on the server 
+#### Notes on the server 
 * The server does not support unique usernames
 * Fixed size buffers restrict size of data transfer
+
+#### Future Goals
+* Implement text wrapping
+* Incorporate more UI features(arrow keys, delete, insert, ect.)
+* Restructure server to have a more intuitive flow
+* Serialize data sent between client and server for safety(and point below)
+* Replace fixed size buffers with length pre-fixed strings in order to minimize server and client message sizes
+* Keep track of usernames and chat-rooms on the server side to minimize message size
