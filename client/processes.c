@@ -195,6 +195,7 @@ void message_loop(int read_fd, int write_fd, int my_fd,
 	
 	fd_set readfds;
 	
+	int max = (read_fd > my_fd) ? read_fd : my_fd;
 	while(1) {
 		memset(&outgoing, 0, sizeof(outgoing));
 		memset(&incoming, 0, sizeof(incoming));
@@ -204,13 +205,12 @@ void message_loop(int read_fd, int write_fd, int my_fd,
 		FD_SET(read_fd, &readfds);
 		FD_SET(my_fd, &readfds);
 		
-		int max = (read_fd > my_fd) ? read_fd : my_fd;
-		
 		//wait for either socket read data or user input data
 		select(max + 1, &readfds, 0, 0, 0);
 		
 		if (FD_ISSET(read_fd, &readfds)) {
 			if (read(read_fd, message, MSG_MAX_LEN) != -1) {
+				if (strchr(message, '\n') != 0) *strchr(message, '\n') = 0;
 				pack_message(&outgoing, message,
 					username, chatroom);
 				
