@@ -110,33 +110,60 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             strcat(text, "\n");
         }
         else if(!strcmp(command, "join")){
-            struct chat_room * new_room = find_room(msg.chatroom, chatrooms);//search for the requested chat room
-            if((int)new_room == -1){//if the room wasnt found...make a new one
-                new_room = (struct chat_room *)(malloc(sizeof(struct chat_room)));//allocate memory for the chat room
-                strcpy(new_room->name, msg.chatroom);//make the requested name the name of the room
-                new_room->users = malloc(sizeof(fd_set));//allocate memory for new fd_set
-                FD_ZERO(new_room->users);
-                new_room->num_users = 0;
-                insert(chatrooms, *new_room);//stick the new room in our list of chat rooms
+            if(!strcmp(msg.chatroom, "IDLE")){
+                strcpy(text, "You cannot join the hidden IDLE room. Use !leave\n");
+                type = MT_ERR;
             }
-            FD_CLR(client_fd, room->users);//remove them from their current room
-            room->num_users--;
-            FD_SET(client_fd, new_room->users);//add them to the new room's fdset
-            new_room->num_users++;
-
-            sprintf(text, "You have joined %s. There are %d users currently in the room.\n", new_room->name, new_room->num_users);
+            else{
+                struct server_message notif;//notification message sent to other users in the chat room
+                char notif_msg[SERVER_MAX_LEN];
+                struct chat_room * new_room = find_room(msg.chatroom, chatrooms);//search for the requested chat room
+                if((int)new_room == -1){//if the room wasnt found...make a new one
+                    new_room = (struct chat_room *)(malloc(sizeof(struct chat_room)));//allocate memory for the chat room
+                    strcpy(new_room->name, msg.chatroom);//make the requested name the name of the room
+                    new_room->users = malloc(sizeof(fd_set));//allocate memory for new fd_set
+                    FD_ZERO(new_room->users);
+                    new_room->num_users = -1;
+                    insert(chatrooms, *new_room);//stick the new room in our list of chat rooms
+                }
+                FD_CLR(client_fd, room->users);//remove them from their current room
+                room->num_users--;
+                FD_SET(client_fd, new_room->users);//add them to the new room's fdset
+                new_room->num_users++;
+                sprintf(text, "You have joined %s. There are currently %d other users in the room.\n", new_room->name, new_room->num_users);
+                sprintf(notif_msg, "%s has joined the room\n", msg.username);
+                pack_msg(&notif, MT_COMMAND, "SERVER", notif_msg, 1);
+                for(i=0; i <=max_fd; i++){//notify other users in the chat room
+                    if(FD_ISSET(i, new_room->users) && i != client_fd){//if i is in the room and i isnt the client who called join
+                        if (send(i, &notif, sizeof(struct server_message), 0) == -1) {
+                            perror("send");
+                        }
+                    }
+                }
+            }
         }
         else if(!strcmp(command, "leave")){
             if(!strcmp(room->name, "IDLE")){
                 strcpy(text, "You are already not in a room\n");
             }
             else{
+                struct server_message notif;//notification message sent to other users in the chat room
+                char notif_msg[SERVER_MAX_LEN];
                 FD_CLR(client_fd, room->users);//remove fd from fdset
                 room->num_users--;
                 printf("leave num_users: %d", room->num_users);
                 FD_SET(client_fd, chatrooms->array[0].users);
                 chatrooms->array[0].num_users++;
                 sprintf(text, "You have left %s\n", room->name);
+                sprintf(notif_msg, "%s has left the room\n", msg.username);
+                pack_msg(&notif, MT_COMMAND, "SERVER", notif_msg, 1);
+                for(i=0; i <=max_fd; i++){//notify other users in the chat room
+                    if(FD_ISSET(i, room->users)){//if i is in the room
+                        if (send(i, &notif, sizeof(struct server_message), 0) == -1) {
+                            perror("send");
+                        }
+                    }
+                }
             }
             in_chatroom = 0;//send message stating that they arent in a chat room anymore
         }
