@@ -247,7 +247,7 @@ void print_server_message(struct server_message msg){
     printf("\nSERVER MESSAGE:\n");
     printf("message type: %d\n", msg.message_type);
     printf("username: %s\n", msg.username);
-    printf("message: %s", msg.message);//doesnt need \n because message already has one
+    printf("message: %s\n", msg.message);//doesnt need \n because message already has one
     printf("in_chatroom: %d\n", msg.in_chatroom);
     printf("END OF CLIENT MESSAGE\n\n");
 }
