@@ -90,6 +90,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
     unsigned short type = MT_ERR;
     char * username = "SERVER";
     char text[SERVER_MAX_LEN+1];
+    memset(text, 0, sizeof(text));
     short in_chatroom = 1;
     print_client_message(msg);
     if((!strcmp(room->name, "IDLE")) && msg.message_type == MT_MESSAGE){
@@ -114,7 +115,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
                 new_room = (struct chat_room *)(malloc(sizeof(struct chat_room)));//allocate memory for the chat room
                 strcpy(new_room->name, msg.chatroom);//make the requested name the name of the room
                 new_room->users = malloc(sizeof(fd_set));//allocate memory for new fd_set
-                new_room->num_users=0;
+                new_room->num_users = 0;
                 insert(chatrooms, *new_room);//stick the new room in our list of chat rooms
             }
             FD_CLR(client_fd, room->users);//remove them from their current room
@@ -139,9 +140,10 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
         }
         else if(!strcmp(command, "msg")){//msg sent to other chat rooms
             type = MT_MESSAGE;
+            username = msg.username;
             room = find_room(msg.chatroom, chatrooms);
             command += strlen(command)+1;//get to the rest of the message that has <room> and message
-            command = strsep(&command, " ");//shift to the message
+            strsep(&command, " ");//shift to the message
             strcpy(text, command);
             if((int)room == -1){//if the room wasnt found
                 type = MT_ERR;
@@ -157,7 +159,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             strcat(text,buffer);
         }
         else if(!strcmp(command, "help")){
-            strcpy(text,"Commands the user can use:\n!list:			list chatrooms\n!join <room>:		join a chatroom\n!leave:			leave the current room\n!msg <room> <message>:	message the indicated room\n!history:		see a log of the messages in the current room\n!help:			lists all available commands\n");
+            strcpy(text,"Commands the user can use:\n!list:			list chatrooms\n!join <room>:		join a chatroom or create a new room if <room> is not found\n!leave:			leave the current room\n!msg <room> <message>:	message the indicated room\n!history:		see a log of the messages in the current room\n!help:			lists all available commands\n!disconnect:	disconnects the client from the server\n");
         }
         else{
             strcpy(text,"ERROR: COMMAND NOT FOUND\n");
@@ -246,7 +248,7 @@ void print_server_message(struct server_message msg){
     printf("\nSERVER MESSAGE:\n");
     printf("message type: %d\n", msg.message_type);
     printf("username: %s\n", msg.username);
-    printf("message: %s", msg.message);//doesnt need \n because message already has one
+    printf("message: %s\n", msg.message);//doesnt need \n because message already has one
     printf("in_chatroom: %d\n", msg.in_chatroom);
     printf("END OF CLIENT MESSAGE\n\n");
 }

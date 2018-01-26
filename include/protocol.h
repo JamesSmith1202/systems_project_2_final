@@ -21,13 +21,14 @@
 #define CHATROOM_MAX_LEN 32
 
 /*
-	commands the user can use (ideas):
+	commands the user can use:
 	!list:			list chatrooms
-	!join <room>:		join a chatroom
+	!join <room>:		join a chatroom or create a new room if <room> is not found
 	!leave:			leave the current room
 	!msg <room> <message>:	message the indicated room
 	!history:		see a log of the messages in the current room
 	!help:			lists all available commands
+	!disconnect:	disconnects the client from the server
 */
 
 /*
