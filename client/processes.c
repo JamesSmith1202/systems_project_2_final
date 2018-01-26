@@ -230,21 +230,21 @@ void message_loop(int read_fd, int write_fd, int my_fd,
 		}
 		else if (FD_ISSET(my_fd, &readfds)) {
 			bytes = recv(my_fd, &incoming, sizeof(incoming), 0);
-			unpack_message(&incoming, message, &in_room);
-			
-			if (bytes == -1) {
-				sprintf(message, "Network read failed\n");
-			}
-			else if (bytes == 0) {
-				sprintf(message, "Disconnected from server\n");
+			if (unpack_message(&incoming, message, &in_room)) {
+				if (bytes == -1) {
+					sprintf(message, "Network read failed\n");
+				}
+				else if (bytes == 0) {
+					sprintf(message, "Disconnected from server\n");
+					write(write_fd, message, strlen(message));
+					break;
+				}
+				
 				write(write_fd, message, strlen(message));
-				break;
+				
+				//client is no longer in a chatroom or !join failed
+				if (in_room == 0) memset(chatroom, 0, sizeof(chatroom));
 			}
-			
-			write(write_fd, message, strlen(message));
-			
-			//client is no longer in a chatroom or !join failed
-			if (in_room == 0) memset(chatroom, 0, sizeof(chatroom));
 		}
 	}
 }

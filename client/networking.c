@@ -159,7 +159,9 @@ void pack_message(struct client_message *outgoing, char *msg,
 	strncpy(outgoing->message, msg, strlen(msg)+1);
 }
 
-void unpack_message(struct server_message *incoming, char *msg, short *in_room) {
+short unpack_message(struct server_message *incoming, char *msg, short *in_room) {
+	if (strlen(incoming->message) < 1) return 0;
+	
 	char server[] = "[SERVER]";
 	char error[] = "[ERROR]";
 	char delim[] = ": ";
@@ -183,6 +185,8 @@ void unpack_message(struct server_message *incoming, char *msg, short *in_room) 
 	strncat(msg, "\n", strlen("\n"));
 	
 	*in_room = incoming->in_chatroom;
+	
+	return 1;
 }
 
 
