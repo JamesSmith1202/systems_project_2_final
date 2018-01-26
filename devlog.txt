@@ -103,3 +103,6 @@ Implement history on server
 linS -- 2018-01-25 19:21:15
 fixed issue with null terminating messages in client
 
+linS -- 2018-01-25 19:45:51
+updated README
+
