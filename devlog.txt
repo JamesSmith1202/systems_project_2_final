@@ -100,3 +100,9 @@ fixing chatroom packaging
 siuR -- 2018-01-25 16:40:13
 Implement history on server
 
+linS -- 2018-01-25 19:21:15
+fixed issue with null terminating messages in client
+
+linS -- 2018-01-25 19:45:51
+updated README
+

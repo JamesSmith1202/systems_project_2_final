@@ -112,7 +112,8 @@ int main() {
 				err( send(in_fd, &out, sizeof(out), 0) );
 				//printf("%s\n", in.chatroom);
 				//printf("%s\n", in.username);
-				printf("%lu\n", strlen(in.chatroom));
+				//printf("%lu\n", strlen(in.chatroom));
+				printf("usermessage: %s : end\n", in.message);
 			//}
 		}
 		

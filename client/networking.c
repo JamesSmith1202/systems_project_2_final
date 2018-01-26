@@ -92,7 +92,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 	}
 	
 	strncpy(outgoing->username, username, strlen(username));
-	strncpy(outgoing->message, msg, strlen(msg)+1);
+	strncpy(outgoing->message, msg, strlen(msg));
 }
 
 void unpack_message(struct server_message *incoming, char *msg, short *in_room) {
@@ -115,7 +115,7 @@ void unpack_message(struct server_message *incoming, char *msg, short *in_room) 
 	}
 	
 	strncat(msg, delim, strlen(delim));
-	strncat(msg, incoming->message, strlen(incoming->message));
+	strncat(msg, incoming->message, strlen(incoming->message)+1);
 	
 	*in_room = incoming->in_chatroom;
 }

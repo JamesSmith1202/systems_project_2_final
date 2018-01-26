@@ -2,12 +2,7 @@ client-objs = client.o processes.o networking.o
 client-libs = -l ncurses -l cdk
 server-objs = server.o array.o log.o
 
-all:
-	make client server
-
-run:
-	gnome-terminal -e ./server_run
-	./client_run
+all: client server
 
 client-debug:
 	gcc -g -c client/client.c client/processes.h
