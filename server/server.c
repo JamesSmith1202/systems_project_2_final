@@ -44,6 +44,11 @@ void scan_accept(int listen_sock, struct sockaddr_storage *client_addr , socklen
         idle->num_users++;
         inet_ntop(client_addr->ss_family, get_in_addr((struct sockaddr *)&client_addr), s, sizeof(s));//convert to human form
         printf("Connection received from %s\n", s);
+        struct server_message out;
+        pack_msg(&out, MT_MESSAGE, "SERVER", "Welcome to the server! Use !help to see commands\n", 0);
+        if (send(new_fd, &out, sizeof(struct server_message), 0) == -1) {
+            perror("send");
+        }
     }
   }
 }
