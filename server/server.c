@@ -87,20 +87,21 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
     char text[SERVER_MAX_LEN+1];
     short in_chatroom = 1;
     print_client_message(msg);
-    if(!strcmp(room->name, "IDLE") && msg.message_type == MT_MESSAGE){
+    if((!strcmp(room->name, "IDLE")) && msg.message_type == MT_MESSAGE){
         strcpy(text, "ERROR: Please join a chat room to send messages\n");
         in_chatroom = 0;
     }
-    else if(msg.message_type == MT_COMMAND){//if it is a command
+    else if(msg.message_type == MT_COMMAND || msg.message_type == MT_ERR){//if it is a command
         char * command = parse_command(msg.message);
         type=MT_COMMAND;
-
+        printf("Command: %s\n", command);
         if(!strcmp(command, "list")){
-          for(i=1;i<chatrooms->len;i++){//iterate through chat rooms and exclude IDLE
-              strcat(text, (chatrooms->array)[i].name);//concatenate the names of the chatrooms to the message
-              strcat(text, " ");
-          }
-          strcat(text, "\n");
+            strcpy(text, "List of chatrooms: ");
+            for(i=1;i<chatrooms->len;i++){//iterate through chat rooms and exclude IDLE
+                strcat(text, (chatrooms->array)[i].name);//concatenate the names of the chatrooms to the message
+                strcat(text, " ");
+            }
+            strcat(text, "\n");
         }
         else if(!strcmp(command, "join")){
             struct chat_room * new_room = find_room(msg.chatroom, chatrooms);//search for the requested chat room
@@ -119,7 +120,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             sprintf(text, "You have joined %s. There are %d users currently in the room.\n", new_room->name, new_room->num_users);
         }
         else if(!strcmp(command, "leave")){
-            if(strcmp(room->name, "IDLE")){
+            if(!strcmp(room->name, "IDLE")){
                 strcpy(text, "You are already not in a room\n");
             }
             else{
@@ -139,7 +140,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             strcpy(text, command);
             if((int)room == -1){//if the room wasnt found
                 type = MT_ERR;
-                strcpy(text,"Error: Chatroom not found");
+                strcpy(text,"ERROR: Chatroom not found");
             }
         }
         else if(!strcmp(command, "history")){
