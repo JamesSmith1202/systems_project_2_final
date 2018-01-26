@@ -34,7 +34,12 @@ void logging(char *log, struct client_message *message) {
 
 void write_log(struct client_message *message) {
     char log[MSG_MAX_LEN + USER_MAX_LEN + 5 + 32];
-    mkdir(message->chatroom, 0700);
+    char basedir[CHATROOM_MAX_LEN + sizeof(LOG_BASEDIR)];
+    strcpy(basedir, LOG_BASEDIR);
+    mkdir(basedir, 0700);
+    strcat(basedir, "/");
+    strcat(basedir, message->chatroom);
+    mkdir(basedir, 0700);
 
     char path[64];
     char date[16];
@@ -47,12 +52,12 @@ void write_log(struct client_message *message) {
     close(fd);
 }
 
-void read_log(char *buffer, char *chatroom, char *date) {
+void read_log(char *buffer, size_t buffer_size, char *chatroom, char *date) {
     char path[64];
     sprintf(path, "%s/%s/%s", LOG_BASEDIR, chatroom, date);
 
     int fd = open(path, O_RDONLY, 0600);
-    read(fd, buffer, sizeof(buffer));
+    read(fd, buffer, buffer_size);
 }
 
 /*

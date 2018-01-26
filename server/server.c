@@ -152,8 +152,9 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             char buffer[SERVER_MAX_LEN + 1];
             char date[10];
             get_date(date, sizeof(date));
-            read_log(buffer, msg.chatroom, date);
-            strcpy(text,buffer);
+            read_log(buffer, sizeof(buffer), room->name, date);
+            strcpy(text, "\n");
+            strcat(text,buffer);
         }
         else if(!strcmp(command, "help")){
             strcpy(text,"Commands the user can use:\n!list:			list chatrooms\n!join <room>:		join a chatroom\n!leave:			leave the current room\n!msg <room> <message>:	message the indicated room\n!history:		see a log of the messages in the current room\n!help:			lists all available commands\n");
