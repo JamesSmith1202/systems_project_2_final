@@ -45,7 +45,7 @@ void scan_accept(int listen_sock, struct sockaddr_storage *client_addr , socklen
         inet_ntop(client_addr->ss_family, get_in_addr((struct sockaddr *)&client_addr), s, sizeof(s));//convert to human form
         printf("Connection received from %s\n", s);
         struct server_message out;
-        pack_msg(&out, MT_MESSAGE, "SERVER", "Welcome to the server! Use !help to see commands\n", 0);
+        pack_msg(&out, MT_COMMAND, "SERVER", "Welcome to the server! Use !help to see commands\n", 0);
         if (send(new_fd, &out, sizeof(struct server_message), 0) == -1) {
             perror("send3");
         }
@@ -94,7 +94,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
     short in_chatroom = 1;
     print_client_message(msg);
     if((!strcmp(room->name, "IDLE")) && msg.message_type == MT_MESSAGE){
-        strcpy(text, "ERROR: Please join a chat room to send messages\n");
+        strcpy(text, "Please join a chat room to send messages\n");
         in_chatroom = 0;
     }
     else if(msg.message_type == MT_COMMAND || msg.message_type == MT_ERR){//if it is a command
@@ -131,18 +131,19 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
                 strcpy(text, "You are already not in a room\n");
             }
             else{
-            FD_CLR(client_fd, room->users);//remove fd from fdset
-            room->num_users--;
-            FD_SET(client_fd, chatrooms->array[0].users);
-            chatrooms->array[0].num_users++;
-            sprintf(text, "You have left %s\n", room->name);
+                FD_CLR(client_fd, room->users);//remove fd from fdset
+                room->num_users--;
+                printf("leave num_users: %d", room->num_users);
+                FD_SET(client_fd, chatrooms->array[0].users);
+                chatrooms->array[0].num_users++;
+                sprintf(text, "You have left %s\n", room->name);
             }
             in_chatroom = 0;//send message stating that they arent in a chat room anymore
         }
         else if(!strcmp(command, "msg")){//msg sent to other chat rooms
             if(!strcmp(msg.chatroom, "IDLE")){
                 type=MT_ERR;
-                strcpy(text, "ERROR: You cannot send messages to the IDLE room\n");
+                strcpy(text, "You cannot send messages to the IDLE room\n");
             }
             else{
                 type = MT_MESSAGE;
@@ -157,7 +158,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
 
                 if((int)room == -1){//if the room wasnt found
                     type = MT_ERR;
-                    strcpy(text,"ERROR: Chatroom not found\n");
+                    strcpy(text,"Chatroom not found\n");
                 }
             }
         }
@@ -166,7 +167,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             char date[10];
             get_date(date, sizeof(date));
             if (read_log(buffer, sizeof(buffer), room->name, date) == -1) {
-                strcpy(text, "ERROR: There is no history for this chatroom.\n");
+                strcpy(text, "There is no history for this chatroom.\n");
             } else {
                 strcpy(text, "\n");
                 strcat(text,buffer);
@@ -176,7 +177,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             strcpy(text,"Commands the user can use:\n!list:			list chatrooms\n!join <room>:		join a chatroom or create a new room if <room> is not found\n!leave:			leave the current room\n!msg <room> <message>:	message the indicated room\n!history:		see a log of the messages in the current room\n!help:			lists all available commands\n!disconnect:	disconnects the client from the server\n");
         }
         else{
-            strcpy(text,"ERROR: COMMAND NOT FOUND\n");
+            strcpy(text,"Command not found\n");
         }
     }
     else{//it is a message to be distributed to other clients
@@ -264,7 +265,7 @@ void print_server_message(struct server_message msg){
     printf("username: %s\n", msg.username);
     printf("message: %s\n", msg.message);//doesnt need \n because message already has one
     printf("in_chatroom: %d\n", msg.in_chatroom);
-    printf("END OF CLIENT MESSAGE\n\n");
+    printf("END OF SERVER MESSAGE\n\n");
 }
 
 void print_chat_room(struct chat_room room){
