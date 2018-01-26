@@ -36,6 +36,7 @@ commands the user can use:
 	!help:			lists all available commands
 	!disconnect:	        disconnects the client from the server
 ```
+* To chat, the user can just enter lines similar to being in a terminal session(type and press enter)
 
 ##### Notes on the client
 * The client can support the BACKSPACE key, but no other special function keys (like DELETE or any arrow keys).
