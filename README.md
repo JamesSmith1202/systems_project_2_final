@@ -49,6 +49,7 @@ commands the user can use:
 #### Notes on the server 
 * The server does not support unique usernames
 * Fixed size buffers restrict size of data transfer
+* History command may occasionally append random characters
 
 #### Future Goals
 * Implement text wrapping
