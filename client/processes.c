@@ -191,7 +191,8 @@ void message_loop(int read_fd, int write_fd, int my_fd,
 	int bytes;
 	struct client_message outgoing;
 	struct server_message incoming;
-	short in_room;
+	short in_room = 0;
+	short disconnect = 0;	//if user has requested to disconnect from server
 	
 	fd_set readfds;
 	
@@ -212,7 +213,13 @@ void message_loop(int read_fd, int write_fd, int my_fd,
 			if (read(read_fd, message, MSG_MAX_LEN) != -1) {
 				if (strchr(message, '\n') != 0) *strchr(message, '\n') = 0;
 				pack_message(&outgoing, message,
-					username, chatroom);
+					username, chatroom, &disconnect);
+				
+				if (disconnect) {
+					sprintf(message, "Disconnected from server\n");
+					write(write_fd, message, strlen(message));
+					break;
+				}
 				
 				bytes = send(my_fd, &outgoing, sizeof(outgoing), 0);
 			}
@@ -278,7 +285,7 @@ void network_process(int read_fd, int write_fd) {
 			memset(ip, 0, sizeof(ip));
 			memset(port, 0, sizeof(port));
 			
-			sprintf(message, "Please enter an ip address\n");
+			sprintf(message, "Please enter an ip address (IPv4 only)\n");
 			write(write_fd, message, strlen(message));
 			read(read_fd, ip, sizeof(ip)-1);
 			ip[63] = 0;

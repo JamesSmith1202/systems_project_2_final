@@ -34,7 +34,7 @@ int valid_connection(int write_fd, struct addrinfo hint, struct addrinfo **data,
 }
 
 void pack_message(struct client_message *outgoing, char *msg,
-		char *username, char *chatroom) {
+		char *username, char *chatroom, short *disconnect) {
 	if (strlen(msg) < 1) return;
 	
 	if (msg[0] == '!') {
@@ -84,6 +84,10 @@ void pack_message(struct client_message *outgoing, char *msg,
 			
 			chatroom[strlen(token)] = 0;
 			outgoing->chatroom[strlen(token)] = 0;
+		}
+		else if (!strcmp(copy, "disconnect")) {
+			*disconnect = 1;
+			return;
 		}
 	}
 	else {

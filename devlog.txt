@@ -112,3 +112,6 @@ updated README
 linS -- 2018-01-25 19:57:23
 quick fixes
 
+linS -- 2018-01-25 21:26:28
+added disconnect command
+
