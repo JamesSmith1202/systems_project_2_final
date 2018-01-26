@@ -69,7 +69,7 @@ void graphics_process(int read_cursor_fd, int read_network_fd) {
 	int cursor_input;
 	//memset(s, 0, sizeof(s));
 	int cur_x, cur_y;
-	move(max_y-2, 1);
+move(max_y-2, 1);
 	getyx(stdscr, cur_y, cur_x);
 	refresh();
 	refreshCDKScreen(log_screen);
@@ -230,16 +230,17 @@ void message_loop(int read_fd, int write_fd, int my_fd,
 		}
 		else if (FD_ISSET(my_fd, &readfds)) {
 			bytes = recv(my_fd, &incoming, sizeof(incoming), 0);
+			
+			if (bytes == -1) {
+				sprintf(message, "Network read failed\n");
+			}
+			else if (bytes == 0) {
+				sprintf(message, "Disconnected from server\n");
+				write(write_fd, message, strlen(message));
+				break;
+			}
+			
 			if (unpack_message(&incoming, message, &in_room)) {
-				if (bytes == -1) {
-					sprintf(message, "Network read failed\n");
-				}
-				else if (bytes == 0) {
-					sprintf(message, "Disconnected from server\n");
-					write(write_fd, message, strlen(message));
-					break;
-				}
-				
 				write(write_fd, message, strlen(message));
 				
 				//client is no longer in a chatroom or !join failed

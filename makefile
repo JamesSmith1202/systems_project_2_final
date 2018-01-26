@@ -40,6 +40,12 @@ client-debug:
 	gcc -g -c client/networking.c client/networking.h include/protocol.h
 	gcc -o client_debug $(client-objs) $(client-libs)
 
+server-debug:
+	gcc -g -c server/server.c include/protocol.h server/server.h
+	gcc -g -c server/array.c server/array.h include/protocol.h
+	gcc -g -c server/log.c server/log.h include/protocol.h
+	gcc -o server_run $(server-objs)
+
 build-test:
 	gcc -g -o test-client test/client_test.c
 	gcc -o test-serv test/serv.c
