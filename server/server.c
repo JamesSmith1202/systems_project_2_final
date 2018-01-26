@@ -139,19 +139,25 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             in_chatroom = 0;//send message stating that they arent in a chat room anymore
         }
         else if(!strcmp(command, "msg")){//msg sent to other chat rooms
-            type = MT_MESSAGE;
-            username = msg.username;
-            room = find_room(msg.chatroom, chatrooms);
-            command += strlen(command)+1;//get to the rest of the message that has <room> and message
-            strsep(&command, " ");//shift to the message
-            strcpy(text, command);
+            if(!strcmp(msg.chatroom, "IDLE")){
+                type=MT_ERR;
+                strcpy(text, "ERROR: You cannot send messages to the IDLE room\n");
+            }
+            else{
+                type = MT_MESSAGE;
+                username = msg.username;
+                room = find_room(msg.chatroom, chatrooms);
+                command += strlen(command)+1;//get to the rest of the message that has <room> and message
+                strsep(&command, " ");//shift to the message
+                strcpy(text, command);
 
-            strcpy(msg.message, text);
-            write_log(&msg);// write to log
-            
-            if((int)room == -1){//if the room wasnt found
-                type = MT_ERR;
-                strcpy(text,"ERROR: Chatroom not found");
+                strcpy(msg.message, text);
+                write_log(&msg);// write to log
+
+                if((int)room == -1){//if the room wasnt found
+                    type = MT_ERR;
+                    strcpy(text,"ERROR: Chatroom not found");
+                }
             }
         }
         else if(!strcmp(command, "history")){
