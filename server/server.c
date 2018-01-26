@@ -124,7 +124,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
                     new_room->users = malloc(sizeof(fd_set));//allocate memory for new fd_set
                     FD_ZERO(new_room->users);
                     new_room->num_users = -1;
-                    insert(chatrooms, *new_room);//stick the new room in our list of chat rooms
+                    insert(chatrooms, new_room);//stick the new room in our list of chat rooms
                 }
                 FD_CLR(client_fd, room->users);//remove them from their current room
                 room->num_users--;
@@ -143,6 +143,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             }
         }
         else if(!strcmp(command, "leave")){
+            printf("enter leave");
             if(!strcmp(room->name, "IDLE")){
                 strcpy(text, "You are already not in a room\n");
             }
@@ -393,7 +394,7 @@ int main()
     idle.num_users = 0;
     fd_set idle_set;
     idle.users = &idle_set;
-    insert(&chatrooms, idle);//idle will be at the 0 index
+    insert(&chatrooms, &idle);//idle will be at the 0 index
     
     int i;
     while (1){ //infinite serving loop

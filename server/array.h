@@ -11,7 +11,7 @@ typedef struct {
 } Array;
 
 void init_arr(Array *, size_t);
-void insert(Array *, struct chat_room);
+void insert(Array *, struct chat_room *);
 void free_arr(Array *);
 
 #endif
