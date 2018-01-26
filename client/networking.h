@@ -23,6 +23,6 @@ void pack_message(struct client_message *outgoing, char *msg,
 	char *username, char *chatroom, short *disconnect);
 
 //packs message from server as per the protocol
-void unpack_message(struct server_message *incoming, char *msg, short *in_room);
+short unpack_message(struct server_message *incoming, char *msg, short *in_room);
 
 #endif

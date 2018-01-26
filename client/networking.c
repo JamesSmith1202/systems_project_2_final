@@ -126,7 +126,11 @@ void pack_message(struct client_message *outgoing, char *msg,
 				return;
 			}
 			
-			strncpy(outgoing->chatroom, token, strlen(token)+1);
+			//strncpy(outgoing->chatroom, token, strlen(token)+1);
+			memset(chatroom, 0, sizeof(chatroom));
+			strncpy(chatroom, token, strlen(token));
+			chatroom[CHATROOM_MAX_LEN] = 0;
+			strncpy(outgoing->chatroom, chatroom, strlen(chatroom)+1);
 		}
 		else if (!strcmp(copy, "join")) {
 			token = strsep(&temp, " ");
@@ -155,7 +159,9 @@ void pack_message(struct client_message *outgoing, char *msg,
 	strncpy(outgoing->message, msg, strlen(msg)+1);
 }
 
-void unpack_message(struct server_message *incoming, char *msg, short *in_room) {
+short unpack_message(struct server_message *incoming, char *msg, short *in_room) {
+	if (strlen(incoming->message) < 1) return 0;
+	
 	char server[] = "[SERVER]";
 	char error[] = "[ERROR]";
 	char delim[] = ": ";
@@ -179,6 +185,8 @@ void unpack_message(struct server_message *incoming, char *msg, short *in_room) 
 	strncat(msg, "\n", strlen("\n"));
 	
 	*in_room = incoming->in_chatroom;
+	
+	return 1;
 }
 
 

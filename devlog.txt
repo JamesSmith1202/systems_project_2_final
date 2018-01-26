@@ -130,3 +130,9 @@ added bounds to chatroom length
 linS -- 2018-01-26 00:40:48
 fixed username issue?
 
+linS -- 2018-01-26 00:47:10
+fixed msg?
+
+linS -- 2018-01-26 01:26:56
+client will ignore messages with 0 length
+
