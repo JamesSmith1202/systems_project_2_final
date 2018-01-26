@@ -38,7 +38,6 @@ void pack_message(struct client_message *outgoing, char *msg,
 	if (strlen(msg) < 1) return;
 	
 	if (msg[0] == '!') {
-		//printf("found !\n");
 		outgoing->message_type = MT_COMMAND;
 		
 		char *token, *temp;
@@ -49,9 +48,7 @@ void pack_message(struct client_message *outgoing, char *msg,
 		temp = copy;
 		
 		token = strsep(&temp, " ");
-		//printf("%s\n", token);
 		if (token == 0 || strlen(token) < 1) {
-			//printf("no arg\n");
 			
 			outgoing->message_type = MT_ERR;
 			
@@ -62,7 +59,6 @@ void pack_message(struct client_message *outgoing, char *msg,
 			//get the target chatroom name
 			token = strsep(&temp, " ");
 			if (token == 0) {
-				//printf("no room\n");
 				outgoing->message_type = MT_ERR;
 				memset(&outgoing, 0, sizeof(outgoing));
 				return;
@@ -79,11 +75,9 @@ void pack_message(struct client_message *outgoing, char *msg,
 			}
 			
 			memset(chatroom, 0, sizeof(chatroom));
-			strncpy(chatroom, token, strlen(token));
-			strncpy(outgoing->chatroom, token, strlen(token));
-			
-			chatroom[strlen(token)] = 0;
-			outgoing->chatroom[strlen(token)] = 0;
+			strncpy(chatroom, token, CHATROOM_MAX_LEN);
+			chatroom[CHATROOM_MAX_LEN] = 0;
+			strncpy(outgoing->chatroom, chatroom, strlen(chatroom));
 		}
 		else if (!strcmp(copy, "disconnect")) {
 			*disconnect = 1;

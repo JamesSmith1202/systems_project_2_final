@@ -124,3 +124,6 @@ Implement history for msg command
 siuR -- 2018-01-25 22:48:21
 Add error handling for history
 
+linS -- 2018-01-25 23:48:29
+added bounds to chatroom length
+

@@ -345,13 +345,8 @@ void network_process(int read_fd, int write_fd) {
 	char *newline;
 	if ( (newline = strchr(username, '\n')) != 0) *newline = 0;
 	
-	/*
-		SEND USERNAME TO SERVER
-	*/
-	
 	char chatroom[USER_MAX_LEN];
 	memset(chatroom, 0, sizeof(chatroom));
-	//strncpy(chatroom, "room boi", strlen("room boi"));
 	
 	message_loop(read_fd, write_fd, my_fd, message, username, chatroom);
 	close(my_fd);
