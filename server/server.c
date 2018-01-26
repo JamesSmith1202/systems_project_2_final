@@ -117,19 +117,23 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             else{
                 struct server_message notif;//notification message sent to other users in the chat room
                 char notif_msg[SERVER_MAX_LEN];
+                int is_new = 0;//tracks if a chat room is new
                 struct chat_room * new_room = find_room(msg.chatroom, chatrooms);//search for the requested chat room
-                if((int)new_room == -1){//if the room wasnt found...make a new one
+                if(new_room == (struct chat_room * )-1){//if the room wasnt found...make a new one
                     new_room = (struct chat_room *)(malloc(sizeof(struct chat_room)));//allocate memory for the chat room
                     strcpy(new_room->name, msg.chatroom);//make the requested name the name of the room
                     new_room->users = malloc(sizeof(fd_set));//allocate memory for new fd_set
                     FD_ZERO(new_room->users);
-                    new_room->num_users = -1;
+                    new_room->num_users = 0;
                     insert(chatrooms, new_room);//stick the new room in our list of chat rooms
+                    is_new = 1;
                 }
                 FD_CLR(client_fd, room->users);//remove them from their current room
                 room->num_users--;
                 FD_SET(client_fd, new_room->users);//add them to the new room's fdset
-                new_room->num_users++;
+                if(!is_new){//if it isnt a new room, increment it
+                    new_room->num_users++;
+                }
                 sprintf(text, "You have joined %s. There are currently %d other users in the room.\n", new_room->name, new_room->num_users);
                 sprintf(notif_msg, "%s has joined the room\n", msg.username);
                 pack_msg(&notif, MT_COMMAND, "SERVER", notif_msg, 1);
@@ -184,7 +188,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
                 strcpy(msg.message, text);
                 write_log(&msg);// write to log
 
-                if((int)room == -1){//if the room wasnt found
+                if(room == (struct chat_room * )-1){//if the room wasnt found
                     type = MT_ERR;
                     strcpy(text,"Chatroom not found\n");
                 }
