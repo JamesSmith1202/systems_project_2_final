@@ -156,7 +156,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
 
                 if((int)room == -1){//if the room wasnt found
                     type = MT_ERR;
-                    strcpy(text,"ERROR: Chatroom not found");
+                    strcpy(text,"ERROR: Chatroom not found\n");
                 }
             }
         }
@@ -164,9 +164,12 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             char buffer[SERVER_MAX_LEN + 1];
             char date[10];
             get_date(date, sizeof(date));
-            read_log(buffer, sizeof(buffer), room->name, date);
-            strcpy(text, "\n");
-            strcat(text,buffer);
+            if (read_log(buffer, sizeof(buffer), room->name, date) == -1) {
+                strcpy(text, "ERROR: There is no history for this chatroom.\n");
+            } else {
+                strcpy(text, "\n");
+                strcat(text,buffer);
+            }
         }
         else if(!strcmp(command, "help")){
             strcpy(text,"Commands the user can use:\n!list:			list chatrooms\n!join <room>:		join a chatroom or create a new room if <room> is not found\n!leave:			leave the current room\n!msg <room> <message>:	message the indicated room\n!history:		see a log of the messages in the current room\n!help:			lists all available commands\n!disconnect:	disconnects the client from the server\n");

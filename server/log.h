@@ -12,6 +12,6 @@ void get_timestamp(char* buffer, size_t bufferLen);
 void get_date(char* buffer, size_t bufferLen);
 void logging(char *log, struct client_message *message);
 void write_log(struct client_message *message);
-void read_log(char *buffer, size_t buffer_size, char *chatroom, char *date);
+int read_log(char *buffer, size_t buffer_size, char *chatroom, char *date);
 
 #endif

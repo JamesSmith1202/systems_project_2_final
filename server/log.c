@@ -52,12 +52,12 @@ void write_log(struct client_message *message) {
     close(fd);
 }
 
-void read_log(char *buffer, size_t buffer_size, char *chatroom, char *date) {
+int read_log(char *buffer, size_t buffer_size, char *chatroom, char *date) {
     char path[64];
     sprintf(path, "%s/%s/%s", LOG_BASEDIR, chatroom, date);
 
     int fd = open(path, O_RDONLY, 0600);
-    read(fd, buffer, buffer_size);
+    return read(fd, buffer, buffer_size);
 }
 
 /*

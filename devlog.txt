@@ -121,3 +121,6 @@ Implement history command
 siuR -- 2018-01-25 22:28:46
 Implement history for msg command
 
+siuR -- 2018-01-25 22:48:21
+Add error handling for history
+
