@@ -82,22 +82,23 @@ void scan_room(struct timeval timeout, struct chat_room * room, Array * chatroom
 void handle_message(int client_fd, struct client_message msg, struct chat_room * room, Array * chatrooms){
     struct server_message out;
     int i;
-    unsigned short type = MT_MESSAGE;
+    unsigned short type = MT_ERR;
     char * username;
-    char * text = "";
+    char text[SERVER_MAX_LEN+1];
     short in_chatroom = 1;
     print_client_message(msg);
     if(msg.message_type == MT_COMMAND){//if it is a command
+        char * command = parse_command(msg.message);
         type=MT_COMMAND;
         username = "SERVER";
 
-        if(!strcmp(msg.message, "list")){
+        if(!strcmp(command, "list")){
           for(i=0;i<chatrooms->len;i++){//iterate through chat rooms
               strcat(text, (chatrooms->array)[i].name);//concatenate the names of the chatrooms to the message
               strcat(text, "\n");
           }
         }
-        else if(!strcmp(msg.message, "join")){
+        else if(!strcmp(command, "join")){
             struct chat_room * new_room = find_room(msg.chatroom, chatrooms);//search for the requested chat room
             if((int)new_room == -1){//if the room wasnt found...make a new one
                 new_room = (struct chat_room *)(malloc(sizeof(struct chat_room)));//allocate memory for the chat room
@@ -112,34 +113,41 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
 
             sprintf(text, "You have joined %s. There are %d users currently in the room.\n", new_room->name, new_room->num_users);
         }
-        else if(!strcmp(msg.message, "leave")){
+        else if(!strcmp(command, "leave")){
             FD_CLR(client_fd, room->users);//remove fd from fdset
             room->num_users--;
             sprintf(text, "You have left %s\n", room->name);
             in_chatroom = 0;//send message stating that they arent in a chat room anymore
         }
-        else if(!strcmp(msg.message, "msg")){//msg sent to other chat rooms
+        else if(!strcmp(command, "msg")){//msg sent to other chat rooms
             type = MT_MESSAGE;
             room = find_room(msg.chatroom, chatrooms);
+            command += strlen(command)+1;//get to the rest of the message that has <room> and message
+            command = strsep(&command, " ");//shift to the message
+            strcpy(text, command);
             if((int)room == -1){//if the room wasnt found
                 type = MT_ERR;
-                text = "Error: Chatroom not found";
+                strcpy(text,"Error: Chatroom not found");
             }
         }
-        else if(!strcmp(msg.message, "history")){
+        else if(!strcmp(command, "history")){
             char buffer[SERVER_MAX_LEN + 1];
             char date[10];
             get_date(date, sizeof(date));
             read_log(buffer, msg.chatroom, date);
-            text = buffer;
+            strcpy(text,buffer);
         }
-        else if(!strcmp(msg.message, "help")){
-            text = "Commands the user can use:\n!list:			list chatrooms\n!join <room>:		join a chatroom\n!leave:			leave the current room\n!msg <room> <message>:	message the indicated room\n!history:		see a log of the messages in the current room\n!help:			lists all available commands\n";
+        else if(!strcmp(command, "help")){
+            strcpy(text,"Commands the user can use:\n!list:			list chatrooms\n!join <room>:		join a chatroom\n!leave:			leave the current room\n!msg <room> <message>:	message the indicated room\n!history:		see a log of the messages in the current room\n!help:			lists all available commands\n");
+        }
+        else{
+            strcpy(text,"ERROR: COMMAND NOT FOUND\n");
         }
     }
     else{//it is a message to be distributed to other clients
-        text = msg.message;//copy the user msg into the server message
+        strcpy(text,msg.message);//copy the user msg into the server message
         username = msg.username;
+        type=MT_MESSAGE;
         write_log(&msg);// write to log
 
     }
@@ -160,6 +168,26 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             }
         }
     }
+}
+
+//takes command, removes ! and new line, and returns 0 if it is just the command, and the msg if it is the !msg command
+char * parse_command(char * msg){
+    msg++;//move 1 ahead to drop the !
+    msg = strip_spaces(msg);//strips spaces and newline at the end
+    char * command = strsep(&msg, " ");//split to isolate the command. msg points to whatever is left over
+    return command;
+}
+
+char * strip_spaces(char * line){
+  int len = strlen(line);
+  char * end = line+len-1;
+  while(*line && isspace(*line)){
+    line++;
+  }
+  while(end > line && isspace(*end)){
+    *end-- = '\0';
+  }
+  return line;
 }
 
 int pack_msg(struct server_message * out, unsigned short type, char * username, char * message, short in_chatroom){

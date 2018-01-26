@@ -14,6 +14,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include "array.h"
+#include <ctype.h>
 
 #define MYPORT "3490"   //Port to listen on
 #define BACKLOG 1000    //number of connections allowed on the incoming queue
@@ -26,6 +27,10 @@ void scan_accept(int, struct sockaddr_storage *, socklen_t *, struct timeval, st
 void scan_room(struct timeval, struct chat_room *, Array *);
 
 void handle_message(int, struct client_message, struct chat_room *, Array *);
+
+char * strip_spaces(char *);
+
+char * parse_command(char *);
 
 int pack_msg(struct server_message *, unsigned short, char *, char *, short);
 
