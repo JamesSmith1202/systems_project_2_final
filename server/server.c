@@ -83,20 +83,24 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
     struct server_message out;
     int i;
     unsigned short type = MT_ERR;
-    char * username;
+    char * username = "SERVER";
     char text[SERVER_MAX_LEN+1];
     short in_chatroom = 1;
     print_client_message(msg);
-    if(msg.message_type == MT_COMMAND){//if it is a command
+    if(!strcmp(room->name, "IDLE") && msg.message_type == MT_MESSAGE){
+        strcpy(text, "ERROR: Please join a chat room to send messages\n");
+        in_chatroom = 0;
+    }
+    else if(msg.message_type == MT_COMMAND){//if it is a command
         char * command = parse_command(msg.message);
         type=MT_COMMAND;
-        username = "SERVER";
 
         if(!strcmp(command, "list")){
-          for(i=0;i<chatrooms->len;i++){//iterate through chat rooms
+          for(i=1;i<chatrooms->len;i++){//iterate through chat rooms and exclude IDLE
               strcat(text, (chatrooms->array)[i].name);//concatenate the names of the chatrooms to the message
-              strcat(text, "\n");
+              strcat(text, " ");
           }
+          strcat(text, "\n");
         }
         else if(!strcmp(command, "join")){
             struct chat_room * new_room = find_room(msg.chatroom, chatrooms);//search for the requested chat room
@@ -104,6 +108,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
                 new_room = (struct chat_room *)(malloc(sizeof(struct chat_room)));//allocate memory for the chat room
                 strcpy(new_room->name, msg.chatroom);//make the requested name the name of the room
                 new_room->users = malloc(sizeof(fd_set));//allocate memory for new fd_set
+                new_room->num_users=0;
                 insert(chatrooms, *new_room);//stick the new room in our list of chat rooms
             }
             FD_CLR(client_fd, room->users);//remove them from their current room
@@ -114,9 +119,16 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             sprintf(text, "You have joined %s. There are %d users currently in the room.\n", new_room->name, new_room->num_users);
         }
         else if(!strcmp(command, "leave")){
+            if(strcmp(room->name, "IDLE")){
+                strcpy(text, "You are already not in a room\n");
+            }
+            else{
             FD_CLR(client_fd, room->users);//remove fd from fdset
             room->num_users--;
+            FD_SET(client_fd, chatrooms->array[0].users);
+            chatrooms->array[0].num_users++;
             sprintf(text, "You have left %s\n", room->name);
+            }
             in_chatroom = 0;//send message stating that they arent in a chat room anymore
         }
         else if(!strcmp(command, "msg")){//msg sent to other chat rooms
@@ -159,7 +171,7 @@ void handle_message(int client_fd, struct client_message msg, struct chat_room *
             perror("send");
         }
     }
-    else{//send to the whole gang
+    else{//send to the chat room
         for(i=0; i <=max_fd; i++){
             if(FD_ISSET(i, room->users)){//if i is in the room
                 if (send(i, &out, sizeof(struct server_message), 0) == -1) {
