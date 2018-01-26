@@ -50,6 +50,7 @@ commands the user can use:
 * The server does not support unique usernames
 * Fixed size buffers restrict size of data transfer
 * History command may occasionally append random characters
+* An incorrect number of inputs to the msg command may break the server
 
 #### Future Goals
 * Implement text wrapping
